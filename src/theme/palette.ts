@@ -34,9 +34,9 @@ const GREY = {
 };
 
 const PRIMARY = {
-  lighter: '#C8FAD6',
-  light: '#5BE49B',
-  main: '#00A76F',
+  lighter: '#DAF4FD',
+  light: '#31C5F4',
+  main: '#31C5F4',
   dark: '#007867',
   darker: '#004B50',
   contrastText: '#FFFFFF',
