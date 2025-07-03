@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 // hooks
+import { Avatar, Typography } from '@mui/material';
 import { useResponsive } from 'src/hooks/use-responsive';
 // hooks
 import { useMockedUser } from 'src/hooks/use-mocked-user';
@@ -52,7 +53,28 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
       }}
     >
       <Logo sx={{ mt: 3, ml: 4, mb: 1 }} />
-
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 3,
+          ml: 3,
+          backgroundColor: '#DAF4FD',
+          // width: '237px',
+          // height: '166px',
+          p: 1,
+          borderRadius: 1,
+        }}
+      >
+        <Avatar sx={{ width: 40, height: 40 }} />
+        <Box sx={{ pl: 2 }}>
+          <Typography sx={{ color: '#212B36', fontWeight: 600, fontSize: '14px' }}>
+            Muhammad Mubashir
+          </Typography>
+          <Typography sx={{ color: '#637381', fontWeight: 400, fontSize: '14px' }}>
+            Admin
+          </Typography>
+        </Box>
+      </Box>
       <NavSectionVertical
         data={navData}
         config={{
@@ -62,7 +84,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      <NavUpgrade />
+      {/* <NavUpgrade /> */}
     </Scrollbar>
   );
 
