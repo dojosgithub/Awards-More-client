@@ -26,7 +26,6 @@ const HomeSubscribeBanner: React.FC = () => (
         width: '100%',
       }}
     >
-      {/* Flag text box */}
       <Box
         sx={{
           width: { xs: '160px', sm: '180px', md: '207px' },
@@ -52,7 +51,6 @@ const HomeSubscribeBanner: React.FC = () => (
         </Typography>
       </Box>
 
-      {/* Bold title */}
       <Typography
         sx={{
           color: 'white',
@@ -64,7 +62,6 @@ const HomeSubscribeBanner: React.FC = () => (
         Lorem is ipsum
       </Typography>
 
-      {/* Paragraph */}
       <Typography
         sx={{
           color: 'white',
@@ -77,7 +74,6 @@ const HomeSubscribeBanner: React.FC = () => (
         No ipsum is lorem and lorem is ipsum
       </Typography>
 
-      {/* Email input + Submit button */}
       <Box
         sx={{
           display: 'flex',
