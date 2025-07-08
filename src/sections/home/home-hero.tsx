@@ -18,7 +18,7 @@ const Home: React.FC = () => (
     }}
   >
     {/* Background Video */}
-    {/* <video
+    <video
       autoPlay
       loop
       muted
@@ -34,9 +34,12 @@ const Home: React.FC = () => (
         opacity: 0.4,
       }}
     >
-      <source src="/assets/background/WebsiteHeader.mp4" type="video/mp4" />
+      <source
+        src="https://res.cloudinary.com/dojo-dev/video/upload/v1751983723/WebsiteHeader-5N4BA6TnVJ-qTN_ho4zbh.mp4"
+        type="video/mp4"
+      />
       Your browser does not support the video tag.
-    </video> */}
+    </video>
 
     {/* Centered Text */}
     <Box sx={{ zIndex: 1, px: 2 }}>
