@@ -49,7 +49,6 @@ const HomeContactUs: React.FC = () => {
         justifyContent="center"
         direction={{ xs: 'column', md: 'row' }}
       >
-        {/* Left: Image */}
         <Grid item xs={12} md={6}>
           <Box
             component="img"
@@ -66,7 +65,6 @@ const HomeContactUs: React.FC = () => {
           />
         </Grid>
 
-        {/* Right: Form */}
         <Grid item xs={12} md={6}>
           <Card
             sx={{
