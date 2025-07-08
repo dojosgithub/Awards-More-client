@@ -21,7 +21,6 @@ const HomeElevate: React.FC = () => (
       justifyContent="space-between"
       direction={{ xs: 'column', md: 'row' }}
     >
-      {/* Left: Text */}
       <Grid item xs={12} md={8}>
         <Typography
           sx={{
@@ -45,7 +44,6 @@ const HomeElevate: React.FC = () => (
         </Typography>
       </Grid>
 
-      {/* Right: Button */}
       <Grid item xs={12} md={4} textAlign={{ xs: 'center', md: 'right' }}>
         <Button
           variant="contained"
