@@ -4,6 +4,9 @@ import MainLayout from 'src/layouts/main';
 // config
 // import { PATH_AFTER_LOGIN } from 'src/config-global';
 //
+import LoginPage from 'src/pages/auth/jwt/login';
+import DashboardLayout from 'src/layouts/dashboard';
+import AuthClassicLayout from 'src/layouts/auth/classic';
 import { mainRoutes, HomePage } from './main';
 import { authRoutes } from './auth';
 import { authDemoRoutes } from './auth-demo';
@@ -26,9 +29,9 @@ export default function Router() {
     {
       path: '/',
       element: (
-        <MainLayout>
-          <HomePage />
-        </MainLayout>
+        <AuthClassicLayout>
+          <LoginPage />
+        </AuthClassicLayout>
       ),
     },
 
@@ -40,7 +43,7 @@ export default function Router() {
     ...dashboardRoutes,
 
     // Main routes
-    ...mainRoutes,
+    // ...mainRoutes,
 
     // Components routes
     ...componentsRoutes,
