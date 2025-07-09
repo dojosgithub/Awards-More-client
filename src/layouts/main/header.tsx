@@ -31,7 +31,6 @@ import { bgBlur } from 'src/theme/css';
 import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
 
-import Label from 'src/components/label';
 import { useRouter } from 'src/routes/hooks';
 
 import { HEADER } from '../config-layout';
