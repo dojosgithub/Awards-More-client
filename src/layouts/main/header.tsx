@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 
 import { Icon } from '@iconify/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState } from 'src/redux/store';
