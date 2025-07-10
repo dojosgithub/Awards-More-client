@@ -31,10 +31,10 @@ export default function CategoryEditView({ id }: Props) {
             href: paths.dashboard.root,
           },
           {
-            name: 'Invoice',
+            name: 'Category',
             href: paths.dashboard.category.root,
           },
-          { name: currentInvoice?.invoiceNumber },
+          // { name: currentInvoice?.invoiceNumber },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },

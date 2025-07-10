@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Stack from '@mui/material/Stack';
 import { Button, Typography } from '@mui/material';
 
+import { LoadingButton } from '@mui/lab';
 import { useRouter } from 'src/routes/hooks';
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 
@@ -70,11 +71,11 @@ export default function CategoryNewEditForm() {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        <RHFTextField name="title" label="Post Title" />
+        <RHFTextField name="title" label="Title" />
         <RHFTextField name="description" label="Description" multiline rows={3} />
 
         <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Cover</Typography>
+          <Typography variant="subtitle2">Copload Picture</Typography>
           <RHFUpload
             name="coverUrl"
             maxSize={3145728}
@@ -83,9 +84,21 @@ export default function CategoryNewEditForm() {
           />
         </Stack>
 
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
+        <LoadingButton
+          sx={{
+            backgroundColor: '#4491CE',
+            color: '#FFFFFF',
+            '&:hover': {
+              backgroundColor: '#357bb0',
+            },
+          }}
+          fullWidth
+          type="submit"
+          size="large"
+          loading={isSubmitting}
+        >
           Submit Now
-        </Button>
+        </LoadingButton>
       </Stack>
     </FormProvider>
   );
