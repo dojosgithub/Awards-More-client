@@ -129,26 +129,21 @@ export function AuthProvider({ children }: Props) {
       password,
     };
 
-    // const res = await axios.post(endpoints.auth.login, data);
-    const response = {
-      accessToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJtb2NrLXVzZXItaWQiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3NTE0MTgwMDB9.wEKnJvPfM3zndI-Bz06hZkUvA_G9X7tQkRGtxrDQjhc',
-      user: {
-        firstName: 'Basil',
-        lastName: 'Khan',
-        email: 'basil@softthree.com',
-      },
-    };
-    const { accessToken, user } = response;
+    const response = await axios.post(endpoints.auth.login, data);
+    console.log(response);
+
+    const { token, staff } = response.data;
+    console.log(token?.accessToken);
+    console.log(staff);
 
     // const { accessToken, user } = res.data;
 
-    setSession(accessToken);
+    setSession(token?.accessToken);
 
     dispatch({
       type: Types.LOGIN,
       payload: {
-        user,
+        user: staff,
       },
     });
   }, []);

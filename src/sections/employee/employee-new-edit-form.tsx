@@ -50,7 +50,9 @@ export default function EmployeeNewEditForm({ currentTour }: Props) {
   const { enqueueSnackbar } = useSnackbar();
 
   const NewTourSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
+    firstName: Yup.string().required('First Name is required'),
+    lastName: Yup.string().required('Last Name is required'),
+
     content: Yup.string().required('Content is required'),
     images: Yup.array().min(1, 'Images is required'),
     //
@@ -73,7 +75,9 @@ export default function EmployeeNewEditForm({ currentTour }: Props) {
 
   const defaultValues = useMemo(
     () => ({
-      name: currentTour?.name || '',
+      firstName: currentTour?.name || '',
+      lastName: currentTour?.name || '',
+
       content: currentTour?.content || '',
       images: currentTour?.images || [],
       //
@@ -160,8 +164,12 @@ export default function EmployeeNewEditForm({ currentTour }: Props) {
           <Stack spacing={1.5}>
             <RHFTextField name="name" placeholder="Employee Id" />
           </Stack>
+
           <Stack spacing={1.5}>
-            <RHFTextField name="name" placeholder="Name" />
+            <RHFTextField name="name" placeholder="First Name" />
+          </Stack>
+          <Stack spacing={1.5}>
+            <RHFTextField name="name" placeholder="Last Name" />
           </Stack>
           <Stack spacing={1.5}>
             <RHFTextField name="name" placeholder="Address" />
