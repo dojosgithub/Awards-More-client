@@ -22,10 +22,12 @@ export type IEmployeeTableFilters = {
 };
 export type IEmployeeItem = {
   employeeId: string;
+  _id: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
   address: string;
   email: string;
   file: any;
+  imageUrl?: string;
 };

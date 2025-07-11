@@ -18,8 +18,9 @@ import { useRouter } from 'src/routes/hooks';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFUpload, RHFTextField } from 'src/components/hook-form';
 import { IEmployeeItem } from 'src/types/employees';
-import { postFormData } from 'src/api/employee';
+import { createEmployee, updateEmployee } from 'src/api/employee';
 import { endpoints } from 'src/utils/axios';
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -57,15 +58,19 @@ export default function EmployeeNewEditForm({ currentEmployee }: Props) {
       .defined(),
   });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const defaultValues: FormValuesProps = {
-    employeeId: currentEmployee?.employeeId || '',
-    firstName: currentEmployee?.firstName || '',
-    lastName: currentEmployee?.lastName || '',
-    email: currentEmployee?.email || '',
-    phoneNumber: currentEmployee?.phoneNumber?.toString() || '',
-    address: currentEmployee?.address || '',
-    file: null,
-  };
+  const defaultValues = useMemo<FormValuesProps>(
+    () => ({
+      employeeId: currentEmployee?.employeeId || '',
+      firstName: currentEmployee?.firstName || '',
+      lastName: currentEmployee?.lastName || '',
+      email: currentEmployee?.email || '',
+      phoneNumber: currentEmployee?.phoneNumber?.toString() || '',
+      address: currentEmployee?.address || '',
+      // For editing, file might be a URL string; set to null or empty string to avoid error in file input
+      file: currentEmployee?.imageUrl || null,
+    }),
+    [currentEmployee]
+  );
 
   const methods = useForm<FormValuesProps>({
     resolver: yupResolver(NewEmployeeSchema),
@@ -84,9 +89,8 @@ export default function EmployeeNewEditForm({ currentEmployee }: Props) {
   console.log(values);
 
   useEffect(() => {
-    if (currentEmployee) {
-      reset(defaultValues);
-    }
+    // Reset form when currentEmployee or defaultValues change
+    reset(defaultValues);
   }, [currentEmployee, defaultValues, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
@@ -102,7 +106,7 @@ export default function EmployeeNewEditForm({ currentEmployee }: Props) {
       formData.append('address', data.address);
 
       if (data.file && typeof data.file === 'object' && 'type' in data.file) {
-        formData.append('file', data.file as File); // Safe cast to File
+        formData.append('file', data.file as File);
       } else {
         formData.append('file', '');
       }
@@ -112,11 +116,18 @@ export default function EmployeeNewEditForm({ currentEmployee }: Props) {
         console.log(`${key}:`, value);
       });
 
-      await postFormData(endpoints.employee.add, formData);
-      enqueueSnackbar('Employee created successfully!');
-      router.push('/dashboard/employees');
+      if (currentEmployee) {
+        await updateEmployee(formData, currentEmployee._id);
+        enqueueSnackbar('Employee updated successfully!');
+      } else {
+        await createEmployee(formData);
+        enqueueSnackbar('Employee created successfully!');
+      }
+
+      // Redirect in both cases
+      router.push(paths.dashboard.employee.root);
     } catch (error) {
-      enqueueSnackbar('Error creating employee', { variant: 'error' });
+      enqueueSnackbar('Error saving employee. Please try again.', { variant: 'error' });
       console.error('Submission error:', error);
     }
   });

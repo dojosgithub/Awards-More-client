@@ -30,7 +30,7 @@ export const endpoints = {
   kanban: '/api/kanban',
   calendar: '/api/calendar',
   auth: {
-    me: '/api/auth/me',
+    me: '/api/admin/profile',
     login: '/api/admin/log-in',
     register: '/api/auth/register',
   },
@@ -47,6 +47,7 @@ export const endpoints = {
   },
   employee: {
     add: '/api/admin/add-employee',
+    update: '/api/admin/employee/:id',
     list: '/api/admin/employees',
 
     details: '/api/admin/employee/:id',

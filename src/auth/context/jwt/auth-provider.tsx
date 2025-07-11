@@ -91,12 +91,17 @@ export function AuthProvider({ children }: Props) {
 
         const res = await axios.get(endpoints.auth.me);
 
-        const { user } = res.data;
+        const { token, staff } = res.data;
+        console.log(token?.accessToken);
+        console.log(staff);
 
+        // const { accessToken, user } = res.data;
+
+        setSession(token?.accessToken);
         dispatch({
           type: Types.INITIAL,
           payload: {
-            user,
+            user: staff,
           },
         });
       } else {
@@ -133,8 +138,8 @@ export function AuthProvider({ children }: Props) {
     console.log(response);
 
     const { token, staff } = response.data;
-    console.log(token?.accessToken);
-    console.log(staff);
+    // console.log(token?.accessToken);
+    // console.log(staff);
 
     // const { accessToken, user } = res.data;
 

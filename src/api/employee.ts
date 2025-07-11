@@ -37,10 +37,25 @@ export function useGetEmployees(filters: IEmployeeTableFilters) {
 }
 
 // add employee
-export async function postFormData(url: string, formData: FormData) {
+export async function createEmployee(formData: FormData) {
+  console.log('apidata', formData);
+  const url = endpoints.employee.add;
+  const response = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+}
+// update employee
+export async function updateEmployee(formData: FormData, employeeId: string) {
   console.log('apidata', formData);
 
-  const response = await axios.post(url, formData, {
+  // Replace :id with actual employeeId in the URL
+  const url = endpoints.employee.update.replace(':id', employeeId);
+
+  const response = await axios.put(url, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
