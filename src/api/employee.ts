@@ -63,6 +63,15 @@ export async function updateEmployee(formData: FormData, employeeId: string) {
 
   return response.data;
 }
+// delete employee
+export async function deleteEmployee(employeeId: string) {
+  // Replace :id with actual employeeId in the URL
+  const url = endpoints.employee.delete.replace(':id', employeeId);
+
+  const response = await axios.delete(url);
+
+  return response.data;
+}
 
 // ----------------------------------------------------------------------
 

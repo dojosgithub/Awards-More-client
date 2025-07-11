@@ -48,6 +48,8 @@ export const endpoints = {
   employee: {
     add: '/api/admin/add-employee',
     update: '/api/admin/employee/:id',
+    delete: '/api/admin/employee/:id',
+
     list: '/api/admin/employees',
 
     details: '/api/admin/employee/:id',

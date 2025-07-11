@@ -16,6 +16,7 @@ import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { Box, Modal } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
@@ -47,7 +48,7 @@ import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/ty
 //
 import CustomButton from 'src/components/button/CustomButton';
 
-import { useGetEmployees } from 'src/api/employee';
+import { deleteEmployee, updateEmployee, useGetEmployees } from 'src/api/employee';
 import { IEmployee, IEmployeeTableFilters } from 'src/types/employees';
 import EmployeeTableToolbar from '../employee-table-toolbar';
 import EmployeeTableRow from '../employee-table-row';
@@ -136,26 +137,15 @@ export default function EmployeeListView() {
     [table]
   );
 
-  const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row._id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
-    },
-    [dataInPage.length, table, tableData]
-  );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row._id));
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleDeleteRow = useCallback(async (id: string) => {
+    try {
+      await deleteEmployee(id);
+      enqueueSnackbar('Employee deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      enqueueSnackbar('Failed to delete employee', { variant: 'error' });
+    }
+  }, []);
 
   const handleEditRow = useCallback(
     (id: string) => {
