@@ -46,8 +46,10 @@ export const endpoints = {
     search: '/api/post/search',
   },
   employee: {
+    add: '/api/admin/add-employee',
     list: '/api/admin/employees',
-    details: '/api/post/details',
+
+    details: '/api/admin/employee/:id',
     latest: '/api/post/latest',
     search: '/api/post/search',
   },

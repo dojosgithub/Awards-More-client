@@ -48,7 +48,7 @@ import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/ty
 import CustomButton from 'src/components/button/CustomButton';
 
 import { useGetEmployees } from 'src/api/employee';
-import { IEmployee, IEmployeeTableFilters } from 'src/types/blog';
+import { IEmployee, IEmployeeTableFilters } from 'src/types/employees';
 import EmployeeTableToolbar from '../employee-table-toolbar';
 import EmployeeTableRow from '../employee-table-row';
 

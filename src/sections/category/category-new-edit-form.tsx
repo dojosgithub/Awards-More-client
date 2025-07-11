@@ -75,7 +75,7 @@ export default function CategoryNewEditForm() {
         <RHFTextField name="description" label="Description" multiline rows={3} />
 
         <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Copload Picture</Typography>
+          <Typography variant="subtitle2">Upload Picture</Typography>
           <RHFUpload
             name="coverUrl"
             maxSize={3145728}

@@ -1,9 +1,10 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 // utils
-import { fetcher, endpoints } from 'src/utils/axios';
+import axios, { fetcher, endpoints } from 'src/utils/axios';
 // types
-import { IEmployee, IEmployeeTableFilters, IPostItem } from 'src/types/blog';
+import { IPostItem } from 'src/types/blog';
+import { IEmployee, IEmployeeItem, IEmployeeTableFilters } from 'src/types/employees';
 
 // ----------------------------------------------------------------------
 
@@ -35,21 +36,34 @@ export function useGetEmployees(filters: IEmployeeTableFilters) {
   );
 }
 
+// add employee
+export async function postFormData(url: string, formData: FormData) {
+  console.log('apidata', formData);
+
+  const response = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+}
+
 // ----------------------------------------------------------------------
 
-export function useGetPost(title: string) {
-  const URL = title ? [endpoints.post.details, { params: { title } }] : null;
+export function useGetEmployee(id: string) {
+  const URL = id ? endpoints.employee.details.replace(':id', id) : null;
 
   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
 
   const memoizedValue = useMemo(
     () => ({
-      post: data?.post as IPostItem,
-      postLoading: isLoading,
-      postError: error,
-      postValidating: isValidating,
+      employee: data?.data as IEmployeeItem,
+      employeeLoading: isLoading,
+      employeeError: error,
+      employeeValidating: isValidating,
     }),
-    [data?.post, error, isLoading, isValidating]
+    [data?.data, error, isLoading, isValidating]
   );
 
   return memoizedValue;

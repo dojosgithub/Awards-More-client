@@ -16,7 +16,7 @@ import { IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/catego
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { IEmployeeTableFilters } from 'src/types/blog';
+import { IEmployeeTableFilters } from 'src/types/employees';
 
 // ----------------------------------------------------------------------
 

@@ -8,6 +8,7 @@ import { _tours } from 'src/_mock';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import { useGetEmployee } from 'src/api/employee';
 import EmployeeNewEditForm from '../employee-new-edit-form';
 
 // ----------------------------------------------------------------------
@@ -19,7 +20,7 @@ type Props = {
 export default function EmployeeEditView({ id }: Props) {
   const settings = useSettingsContext();
 
-  const currentTour = _tours.find((tour) => tour.id === id);
+  const { employee: currentEmployee, employeeLoading } = useGetEmployee(id);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -34,14 +35,16 @@ export default function EmployeeEditView({ id }: Props) {
             name: 'Employee',
             href: paths.dashboard.employee.root,
           },
-          { name: currentTour?.name },
+          { name: currentEmployee?.firstName },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },
         }}
       />
 
-      <EmployeeNewEditForm currentTour={currentTour} />
+      {!employeeLoading && currentEmployee && (
+        <EmployeeNewEditForm currentEmployee={currentEmployee} />
+      )}
     </Container>
   );
 }
