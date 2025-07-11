@@ -16,11 +16,12 @@ import { IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/catego
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { IEmployeeTableFilters } from 'src/types/blog';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  filters: IInvoiceTableFilters;
+  filters: IEmployeeTableFilters;
   onFilters: (name: string, value: IInvoiceTableFilterValue) => void;
   //
   dateError: boolean;

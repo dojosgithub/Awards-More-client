@@ -45,6 +45,12 @@ export const endpoints = {
     latest: '/api/post/latest',
     search: '/api/post/search',
   },
+  employee: {
+    list: '/api/admin/employees',
+    details: '/api/post/details',
+    latest: '/api/post/latest',
+    search: '/api/post/search',
+  },
   product: {
     list: '/api/product/list',
     details: '/api/product/details',

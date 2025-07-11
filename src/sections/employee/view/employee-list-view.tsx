@@ -1,5 +1,5 @@
 import sumBy from 'lodash/sumBy';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -47,6 +47,8 @@ import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/ty
 //
 import CustomButton from 'src/components/button/CustomButton';
 
+import { useGetEmployees } from 'src/api/employee';
+import { IEmployee, IEmployeeTableFilters } from 'src/types/blog';
 import EmployeeTableToolbar from '../employee-table-toolbar';
 import EmployeeTableRow from '../employee-table-row';
 
@@ -61,10 +63,11 @@ const TABLE_HEAD = [
   { id: 'actions', label: 'Actions' },
 ];
 
-const defaultFilters: IInvoiceTableFilters = {
+const defaultFilters: IEmployeeTableFilters = {
+  service: '',
+  status: '',
   name: '',
-  service: [],
-  status: 'all',
+  role: 'all',
   startDate: null,
   endDate: null,
 };
@@ -82,10 +85,17 @@ export default function EmployeeListView() {
 
   const confirm = useBoolean();
 
-  const [tableData, setTableData] = useState(_invoices);
-
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState<IEmployeeTableFilters>(defaultFilters);
   const [open, setOpen] = useState(false);
+  const { employees, employeesLoading } = useGetEmployees(filters);
+  console.log(employees);
+
+  const [tableData, setTableData] = useState<IEmployee[]>([]);
+  useEffect(() => {
+    if (employees.length) {
+      setTableData(employees);
+    }
+  }, [employees]);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const dateError =
@@ -128,7 +138,7 @@ export default function EmployeeListView() {
 
   const handleDeleteRow = useCallback(
     (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
+      const deleteRow = tableData.filter((row) => row._id !== id);
       setTableData(deleteRow);
 
       table.onUpdatePageDeleteRow(dataInPage.length);
@@ -137,7 +147,7 @@ export default function EmployeeListView() {
   );
 
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row._id));
     setTableData(deleteRows);
 
     table.onUpdatePageDeleteRows({
@@ -203,7 +213,7 @@ export default function EmployeeListView() {
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    tableData.map((row) => row.id)
+                    tableData.map((row) => row._id)
                   )
                 }
               />
@@ -216,13 +226,13 @@ export default function EmployeeListView() {
                   )
                   .map((row) => (
                     <EmployeeTableRow
-                      key={row.id}
+                      key={row._id}
                       row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onViewRow={() => handleViewRow(row.id)}
-                      onEditRow={() => handleEditRow(row.id)}
-                      onDeleteRow={() => handleDeleteRow(row.id)}
+                      selected={table.selected.includes(row._id)}
+                      onSelectRow={() => table.onSelectRow(row._id)}
+                      onViewRow={() => handleViewRow(row._id)}
+                      onEditRow={() => handleEditRow(row._id)}
+                      onDeleteRow={() => handleDeleteRow(row._id)}
                     />
                   ))}
 
@@ -237,16 +247,16 @@ export default function EmployeeListView() {
           </Scrollbar>
         </TableContainer>
 
-        {/* <TablePaginationCustom
-            count={dataFiltered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            //
-            dense={table.dense}
-            onChangeDense={table.onChangeDense}
-          /> */}
+        <TablePaginationCustom
+          count={dataFiltered.length}
+          page={table.page}
+          rowsPerPage={table.rowsPerPage}
+          onPageChange={table.onChangePage}
+          onRowsPerPageChange={table.onChangeRowsPerPage}
+          //
+          dense={table.dense}
+          onChangeDense={table.onChangeDense}
+        />
       </Card>
     </Container>
   );
@@ -260,12 +270,12 @@ function applyFilter({
   filters,
   dateError,
 }: {
-  inputData: IInvoice[];
+  inputData: IEmployee[];
   comparator: (a: any, b: any) => number;
-  filters: IInvoiceTableFilters;
+  filters: IEmployeeTableFilters;
   dateError: boolean;
 }) {
-  const { name, status, service, startDate, endDate } = filters;
+  const { name, role, startDate, endDate } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -277,22 +287,28 @@ function applyFilter({
 
   inputData = stabilizedThis.map((el) => el[0]);
 
+  // Filter by name (first or last)
   if (name) {
+    const lowerCaseName = name.toLowerCase();
     inputData = inputData.filter(
-      (invoice) =>
-        invoice.invoiceNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        invoice.invoiceTo.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (employee) =>
+        employee.firstName.toLowerCase().includes(lowerCaseName) ||
+        employee.lastName.toLowerCase().includes(lowerCaseName) ||
+        employee.email.toLowerCase().includes(lowerCaseName)
     );
   }
 
-  if (status !== 'all') {
-    inputData = inputData.filter((invoice) => invoice.status === status);
+  // Filter by role
+  if (role && role !== 'all') {
+    inputData = inputData.filter((employee) => employee.role === role);
   }
 
-  if (service.length) {
-    inputData = inputData.filter((invoice) =>
-      invoice.items.some((filterItem) => service.includes(filterItem.service))
-    );
+  // Filter by created date
+  if (!dateError && startDate && endDate) {
+    inputData = inputData.filter((employee) => {
+      const createdAt = new Date(employee.createdAt).getTime();
+      return createdAt >= startDate.getTime() && createdAt <= endDate.getTime();
+    });
   }
 
   return inputData;

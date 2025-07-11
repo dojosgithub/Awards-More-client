@@ -23,11 +23,12 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { IEmployee } from 'src/types/blog';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IInvoice;
+  row: IEmployee;
   selected: boolean;
   onSelectRow: VoidFunction;
   onViewRow: VoidFunction;
@@ -43,7 +44,19 @@ export default function EmployeeTableRow({
   onEditRow,
   onDeleteRow,
 }: Props) {
-  const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalAmount } = row;
+  const {
+    _id,
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    address,
+    employeeId,
+    imageUrl,
+    role,
+    createdAt,
+    updatedAt,
+  } = row;
 
   const confirm = useBoolean();
 
@@ -52,14 +65,14 @@ export default function EmployeeTableRow({
   return (
     <>
       <TableRow hover selected={selected}>
-        <TableCell>322323</TableCell>
+        <TableCell>{_id}</TableCell>
 
-        <TableCell>Mobi</TableCell>
+        <TableCell>{`${firstName} ${lastName}`}</TableCell>
 
-        <TableCell>h#dsdad1312</TableCell>
+        <TableCell>{address}</TableCell>
 
-        <TableCell>mobi@mai.com</TableCell>
-        <TableCell>03232323232</TableCell>
+        <TableCell>{email}</TableCell>
+        <TableCell>{phoneNumber}</TableCell>
         <TableCell sx={{ px: 1 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
