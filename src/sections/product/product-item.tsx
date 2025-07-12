@@ -18,7 +18,6 @@ import { ColorPreview } from 'src/components/color-utils';
 // types
 import { IProductItem } from 'src/types/product';
 //
-import { useCheckoutContext } from '../checkout/context';
 
 // ----------------------------------------------------------------------
 
@@ -27,8 +26,6 @@ type Props = {
 };
 
 export default function ProductItem({ product }: Props) {
-  const { onAddToCart } = useCheckoutContext();
-
   const { id, name, coverUrl, price, colors, available, sizes, priceSale, newLabel, saleLabel } =
     product;
 
@@ -46,7 +43,8 @@ export default function ProductItem({ product }: Props) {
       quantity: 1,
     };
     try {
-      onAddToCart(newProduct);
+      // onAddToCart(newProduct);
+      alert('error');
     } catch (error) {
       console.error(error);
     }

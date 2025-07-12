@@ -7,8 +7,11 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // routes
+import { useLocation } from 'react-router';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { useDispatch } from 'react-redux';
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { useParams, useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 // auth
 import { useAuthContext } from 'src/auth/hooks';
@@ -17,24 +20,37 @@ import { PasswordIcon } from 'src/assets/icons';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { setNewPasswordApi } from 'src/api/auth';
+import { setSession } from 'src/auth/context/jwt/utils';
+import { setCredentials } from 'src/redux/slices/authSlice';
 
 // ----------------------------------------------------------------------
 
 export default function JwtPasswordCodeView() {
   const { forgotPassword } = useAuthContext();
+  const location = useLocation();
 
+  const queryParams = new URLSearchParams(location.search);
+  const email = queryParams.get('email');
+
+  console.log('params', email);
+  const dispatch = useDispatch();
   const router = useRouter();
 
-  const ForgotPasswordSchema = Yup.object().shape({
-    email: Yup.string().required('Code is required'),
+  const CodeOtpSchema = Yup.object().shape({
+    code: Yup.string().required('Code is required'),
+    password: Yup.string().required('Password is required'),
+    confirmPassword: Yup.string().required('Confirm Password is required'),
   });
 
   const defaultValues = {
-    email: '',
+    code: '',
+    password: '',
+    confirmPassword: '',
   };
 
   const methods = useForm({
-    resolver: yupResolver(ForgotPasswordSchema),
+    resolver: yupResolver(CodeOtpSchema),
     defaultValues,
   });
 
@@ -45,14 +61,15 @@ export default function JwtPasswordCodeView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // await forgotPassword?.(data.email);
-
-      // const searchParams = new URLSearchParams({
-      //   email: data.email,
-      // }).toString();
-
-      // const href = `${paths.auth.firebase.verify}?${searchParams}`;
-      router.push(paths.auth.jwt.newpassword);
+      const payload = {
+        email,
+        code: data.code,
+        password: data.password,
+      };
+      const res = await setNewPasswordApi?.(payload);
+      // setSession(res?.tokens?.accessToken);
+      dispatch(setCredentials({ email, password: data.password }));
+      router.push(paths.auth.jwt.continue);
     } catch (error) {
       console.error(error);
     }
@@ -60,7 +77,10 @@ export default function JwtPasswordCodeView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField name="email" label="Enter Code" />
+      <RHFTextField name="code" label="Enter Code" />
+      <RHFTextField name="password" label="New Password" />
+
+      <RHFTextField name="confirmPassword" label="Confirm Password" />
 
       <LoadingButton
         sx={{

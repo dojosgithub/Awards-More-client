@@ -28,7 +28,6 @@ import { useSettingsContext } from 'src/components/settings';
 import { IProductItem, IProductFilters, IProductFilterValue } from 'src/types/product';
 //
 import Banner from 'src/components/banner/banner';
-import { useCheckoutContext } from '../../checkout/context';
 import CartIcon from '../common/cart-icon';
 import ProductList from '../product-list';
 import ProductSort from '../product-sort';
@@ -51,8 +50,6 @@ const defaultFilters: IProductFilters = {
 
 export default function ProductShopView() {
   const settings = useSettingsContext();
-
-  const checkout = useCheckoutContext();
 
   const openFilters = useBoolean();
 

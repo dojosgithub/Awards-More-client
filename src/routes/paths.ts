@@ -24,7 +24,6 @@ export const paths = {
   about: '/about-us',
   contact: '/contact-us',
   categories: '/categories',
-  cart: '/cart',
   faqs: '/faqs',
   page403: '/403',
   page404: '/404',

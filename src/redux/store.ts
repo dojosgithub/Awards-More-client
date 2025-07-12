@@ -1,12 +1,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configureStore } from '@reduxjs/toolkit';
 // import your reducers here
-import cartReducer from './slices/cartSlice';
+import authReducer from './slices/authSlice';
 
 export const store = configureStore({
   reducer: {
-    cart: cartReducer,
-    // add more reducers here
+    auth: authReducer,
   },
 });
 

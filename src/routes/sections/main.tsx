@@ -17,7 +17,6 @@ const FaqsPage = lazy(() => import('src/pages/faqs'));
 const AboutPage = lazy(() => import('src/pages/about-us'));
 const ContactPage = lazy(() => import('src/pages/contact-us'));
 const CategoriesPage = lazy(() => import('src/pages/categories'));
-const CartPage = lazy(() => import('src/pages/cart'));
 
 const PricingPage = lazy(() => import('src/pages/pricing'));
 const PaymentPage = lazy(() => import('src/pages/payment'));
@@ -46,7 +45,6 @@ export const mainRoutes = [
       { path: 'about-us', element: <AboutPage /> },
       { path: 'contact-us', element: <ContactPage /> },
       { path: 'categories', element: <CategoriesPage /> },
-      { path: 'cart', element: <CartPage /> },
 
       { path: 'faqs', element: <FaqsPage /> },
       {

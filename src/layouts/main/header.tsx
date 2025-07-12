@@ -24,7 +24,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState } from 'src/redux/store';
 import { setCartOpen } from 'src/redux/slices/cartSlice';
-import CartDrawer from 'src/sections/cart/cart-drawer';
 import { useOffSetTop } from 'src/hooks/use-off-set-top';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { bgBlur } from 'src/theme/css';
@@ -40,10 +39,10 @@ export default function Header() {
   const mdUp = useResponsive('up', 'md');
   const offsetTop = useOffSetTop(HEADER.H_DESKTOP);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const dispatch = useDispatch();
-  const cartOpen = useSelector((state: RootState) => state.cart.cartOpen);
-  const { totalQuantity } = useSelector((state: RootState) => state.cart);
-  console.log(totalQuantity);
+  // const dispatch = useDispatch();
+  // const cartOpen = useSelector((state: RootState) => state.cart.cartOpen);
+  // const { totalQuantity } = useSelector((state: RootState) => state.cart);
+  // console.log(totalQuantity);
 
   const router = useRouter();
   const navLinks = [
@@ -141,33 +140,6 @@ export default function Header() {
                 ))}
               </Stack>
             )}
-
-            {/* Right Icons */}
-            <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
-              {!mdUp && (
-                <IconButton onClick={handleDrawerToggle}>
-                  <Icon icon="mdi:menu" width={24} />
-                </IconButton>
-              )}
-              <IconButton>
-                <Icon icon="mdi:magnify" width={24} />
-              </IconButton>
-              <IconButton>
-                <Icon icon="mdi:account-circle" width={24} />
-              </IconButton>
-              <IconButton onClick={() => dispatch(setCartOpen(true))}>
-                <Badge
-                  badgeContent={totalQuantity}
-                  color="primary"
-                  overlap="circular"
-                  invisible={totalQuantity === 0}
-                >
-                  <Icon icon="mdi:cart" width={24} />
-                </Badge>
-              </IconButton>
-              <CartDrawer open={cartOpen} onClose={() => dispatch(setCartOpen(false))} />
-              <Button onClick={() => router.push(paths.auth.jwt.login)}>Sign in</Button>
-            </Stack>
           </Container>
         </Toolbar>
       </AppBar>

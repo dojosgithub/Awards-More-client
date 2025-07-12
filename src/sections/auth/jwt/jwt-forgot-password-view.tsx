@@ -17,12 +17,11 @@ import { PasswordIcon } from 'src/assets/icons';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { forgotPasswordApi } from 'src/api/auth';
 
 // ----------------------------------------------------------------------
 
 export default function JwtForgotPasswordView() {
-  const { forgotPassword } = useAuthContext();
-
   const router = useRouter();
 
   const ForgotPasswordSchema = Yup.object().shape({
@@ -45,14 +44,9 @@ export default function JwtForgotPasswordView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // await forgotPassword?.(data.email);
+      await forgotPasswordApi({ email: data.email });
 
-      // const searchParams = new URLSearchParams({
-      //   email: data.email,
-      // }).toString();
-
-      // const href = `${paths.auth.firebase.verify}?${searchParams}`;
-      router.push(paths.auth.jwt.passwordcode);
+      router.push(`${paths.auth.jwt.passwordcode}?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       console.error(error);
     }

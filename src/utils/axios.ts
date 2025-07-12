@@ -33,6 +33,8 @@ export const endpoints = {
     me: '/api/admin/profile',
     login: '/api/admin/log-in',
     register: '/api/auth/register',
+    forgotPassword: '/api/admin/forgot-password',
+    new: '/api/admin/verify-otp',
   },
   mail: {
     list: '/api/mail/list',
