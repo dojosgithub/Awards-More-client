@@ -21,7 +21,7 @@ export function useGetCategories(filters: ICategoryTableFilters) {
   const query = buildQueryParams(filters);
   const URL = `${endpoints.category.list}?${query}`;
 
-  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+  const { data, isLoading, error, isValidating, mutate } = useSWR(URL, fetcher);
 
   const memoizedValue = useMemo(
     () => ({
@@ -31,8 +31,9 @@ export function useGetCategories(filters: ICategoryTableFilters) {
       categoryError: error,
       categoryValidating: isValidating,
       categoryEmpty: !isLoading && !data?.docs.length,
+      mutateCategory: mutate,
     }),
-    [data, error, isLoading, isValidating]
+    [data, error, isLoading, isValidating, mutate]
   );
 
   return memoizedValue;
@@ -52,11 +53,10 @@ export async function createCategory(formData: FormData) {
   return response.data;
 }
 // update category
-export async function updateCategory(formData: FormData, employeeId: string) {
+export async function updateCategory(formData: FormData, categoryId: string) {
   console.log('apidata', formData);
 
-  // Replace :id with actual employeeId in the URL
-  const url = endpoints.category.update.replace(':id', employeeId);
+  const url = endpoints.category.update.replace(':id', categoryId);
 
   const response = await axios.put(url, formData, {
     headers: {
@@ -84,4 +84,13 @@ export function useGetCategory(id: string) {
   );
 
   return memoizedValue;
+}
+
+// delete category
+export async function deleteCategory(categoryId: string) {
+  const url = endpoints.category.delete.replace(':id', categoryId);
+
+  const response = await axios.delete(url);
+
+  return response.data;
 }

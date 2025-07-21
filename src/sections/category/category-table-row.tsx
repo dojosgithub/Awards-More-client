@@ -71,7 +71,13 @@ export default function CategoryTableRow({
 
         <TableCell sx={{ px: 1 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+            <IconButton
+              color={popover.open ? 'inherit' : 'default'}
+              onClick={() => {
+                confirm.onTrue();
+                popover.onClose();
+              }}
+            >
               <Iconify icon="weui:delete-outlined" />
             </IconButton>
             <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
@@ -87,7 +93,7 @@ export default function CategoryTableRow({
         arrow="right-top"
         sx={{ width: 160 }}
       >
-        <MenuItem
+        {/* <MenuItem
           onClick={() => {
             onViewRow();
             popover.onClose();
@@ -95,7 +101,7 @@ export default function CategoryTableRow({
         >
           <Iconify icon="solar:eye-bold" />
           View
-        </MenuItem>
+        </MenuItem> */}
 
         <MenuItem
           onClick={() => {
@@ -127,7 +133,14 @@ export default function CategoryTableRow({
         title="Delete"
         content="Are you sure want to delete?"
         action={
-          <Button variant="contained" color="error" onClick={onDeleteRow}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              onDeleteRow();
+              confirm.onFalse();
+            }}
+          >
             Delete
           </Button>
         }

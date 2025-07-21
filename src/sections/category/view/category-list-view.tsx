@@ -11,6 +11,7 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { Box, Modal, TablePagination } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 // hooks
@@ -37,7 +38,7 @@ import {
 import { ICategory, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 //
 import CustomButton from 'src/components/button/CustomButton';
-import { useGetCategories } from 'src/api/categories';
+import { deleteCategory, useGetCategories } from 'src/api/categories';
 import CategoryNewEditForm from '../category-new-edit-form';
 import CategoryTableToolbar from '../category-table-toolbar';
 import CategoryTableRow from '../category-table-row';
@@ -88,7 +89,7 @@ export default function CategoryListView() {
   });
 
   const confirm = useBoolean();
-  const { category, categoryLoading, categoryError, categoryValidating, totalDocs } =
+  const { category, categoryLoading, categoryError, mutateCategory, totalDocs } =
     useGetCategories(filters);
   // console.log('category', category);
   const [tableData, setTableData] = useState<ICategory[]>([]);
@@ -143,13 +144,17 @@ export default function CategoryListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row._id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id: string) => {
+      try {
+        await deleteCategory(id);
+        enqueueSnackbar('Category deleted successfully!');
+        mutateCategory();
+      } catch (error) {
+        console.error('Error deleting Category:', error);
+        enqueueSnackbar('Failed to delete Category', { variant: 'error' });
+      }
     },
-    [dataInPage.length, table, tableData]
+    [mutateCategory]
   );
 
   const handleDeleteRows = useCallback(() => {
@@ -315,12 +320,8 @@ export default function CategoryListView() {
           }}
         >
           <h2 id="add-category-title">Add New Category</h2>
-          <CategoryNewEditForm />
-          {/* <Box mt={2}>
-            <Button onClick={handleClose} variant="outlined">
-              Close
-            </Button>
-          </Box> */}
+
+          <CategoryNewEditForm handleClose={handleClose} mutateCategory={mutateCategory} />
         </Box>
       </Modal>
     </>

@@ -45,6 +45,7 @@ export const endpoints = {
     list: '/api/admin/categories',
     add: '/api/admin/add-category',
     update: '/api/admin/category/:id',
+    delete: '/api/admin/category/:id',
 
     details: '/api/admin/category/:id',
 

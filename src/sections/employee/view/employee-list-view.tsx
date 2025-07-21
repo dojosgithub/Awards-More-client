@@ -80,7 +80,7 @@ export default function EmployeeListView() {
   });
   const [page, setPage] = useState(0); // MUI uses 0-based page index
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { employees, employeesLoading, totalDocs } = useGetEmployees(filters);
+  const { employees, mutateEmployees, totalDocs } = useGetEmployees(filters);
   console.log(employees);
 
   const [tableData, setTableData] = useState<IEmployee[]>([]);
@@ -123,15 +123,19 @@ export default function EmployeeListView() {
     [table]
   );
 
-  const handleDeleteRow = useCallback(async (id: string) => {
-    try {
-      await deleteEmployee(id);
-      enqueueSnackbar('Employee deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting employee:', error);
-      enqueueSnackbar('Failed to delete employee', { variant: 'error' });
-    }
-  }, []);
+  const handleDeleteRow = useCallback(
+    async (id: string) => {
+      try {
+        await deleteEmployee(id);
+        enqueueSnackbar('Employee deleted successfully!');
+        mutateEmployees();
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        enqueueSnackbar('Failed to delete employee', { variant: 'error' });
+      }
+    },
+    [mutateEmployees]
+  );
 
   const handleEditRow = useCallback(
     (id: string) => {

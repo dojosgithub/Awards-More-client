@@ -16,6 +16,8 @@ import { paths } from 'src/routes/paths';
 
 type Props = {
   currentCategory?: ICategoryItem;
+  handleClose?: () => void;
+  mutateCategory?: () => void;
 };
 type FormValuesProps = {
   title: string;
@@ -24,7 +26,11 @@ type FormValuesProps = {
   file: any;
 };
 
-export default function CategoryNewEditForm({ currentCategory }: Props) {
+export default function CategoryNewEditForm({
+  currentCategory,
+  handleClose,
+  mutateCategory,
+}: Props) {
   const router = useRouter();
 
   const CategorySchema = Yup.object({
@@ -94,6 +100,12 @@ export default function CategoryNewEditForm({ currentCategory }: Props) {
       } else {
         await createCategory(formData);
         enqueueSnackbar('Category created successfully!');
+        if (mutateCategory) {
+          mutateCategory();
+        }
+        if (handleClose) {
+          handleClose();
+        }
       }
 
       // Redirect in both cases

@@ -23,7 +23,7 @@ export function useGetEmployees(filters: IEmployeeTableFilters) {
   const query = buildQueryParams(filters);
   const URL = `${endpoints.employee.list}?${query}`;
 
-  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+  const { data, isLoading, error, isValidating, mutate } = useSWR(URL, fetcher);
 
   return useMemo(
     () => ({
@@ -32,8 +32,9 @@ export function useGetEmployees(filters: IEmployeeTableFilters) {
       employeesLoading: isLoading,
       employeesError: error,
       employeesValidating: isValidating,
+      mutateEmployees: mutate,
     }),
-    [data, isLoading, error, isValidating]
+    [data, isLoading, error, isValidating, mutate]
   );
 }
 
