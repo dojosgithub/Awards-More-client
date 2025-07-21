@@ -2,35 +2,26 @@ import sumBy from 'lodash/sumBy';
 import { useState, useCallback, useEffect } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
+
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
+
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
-import { Box, Modal } from '@mui/material';
+import { TablePagination } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fTimestamp } from 'src/utils/format-time';
 // _mock
-import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
+import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
+
 import Scrollbar from 'src/components/scrollbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
@@ -40,15 +31,13 @@ import {
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
-  TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IInvoice, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { IInvoiceTableFilterValue } from 'src/types/category';
 //
 import CustomButton from 'src/components/button/CustomButton';
 
-import { deleteEmployee, updateEmployee, useGetEmployees } from 'src/api/employee';
+import { deleteEmployee, useGetEmployees } from 'src/api/employee';
 import { IEmployee, IEmployeeTableFilters } from 'src/types/employees';
 import EmployeeTableToolbar from '../employee-table-toolbar';
 import EmployeeTableRow from '../employee-table-row';
@@ -84,11 +73,14 @@ export default function EmployeeListView() {
 
   const table = useTable({ defaultOrderBy: '' });
 
-  const confirm = useBoolean();
-
-  const [filters, setFilters] = useState<IEmployeeTableFilters>(defaultFilters);
-  const [open, setOpen] = useState(false);
-  const { employees, employeesLoading } = useGetEmployees(filters);
+  const [filters, setFilters] = useState<IEmployeeTableFilters>({
+    ...defaultFilters,
+    page: 1,
+    limit: 10,
+  });
+  const [page, setPage] = useState(0); // MUI uses 0-based page index
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const { employees, employeesLoading, totalDocs } = useGetEmployees(filters);
   console.log(employees);
 
   const [tableData, setTableData] = useState<IEmployee[]>([]);
@@ -154,7 +146,17 @@ export default function EmployeeListView() {
     },
     [router]
   );
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+    setFilters((prev) => ({ ...prev, page: newPage + 1 })); // API expects 1-based page
+  };
 
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLimit = parseInt(event.target.value, 10);
+    setRowsPerPage(newLimit);
+    setPage(0);
+    setFilters((prev) => ({ ...prev, page: 1, limit: newLimit }));
+  };
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
@@ -203,22 +205,17 @@ export default function EmployeeListView() {
               />
 
               <TableBody>
-                {dataFiltered
-                  .slice(
-                    table.page * table.rowsPerPage,
-                    table.page * table.rowsPerPage + table.rowsPerPage
-                  )
-                  .map((row) => (
-                    <EmployeeTableRow
-                      key={row._id}
-                      row={row}
-                      selected={table.selected.includes(row._id)}
-                      onSelectRow={() => table.onSelectRow(row._id)}
-                      onViewRow={() => handleViewRow(row._id)}
-                      onEditRow={() => handleEditRow(row._id)}
-                      onDeleteRow={() => handleDeleteRow(row._id)}
-                    />
-                  ))}
+                {dataFiltered.map((row) => (
+                  <EmployeeTableRow
+                    key={row._id}
+                    row={row}
+                    selected={table.selected.includes(row._id)}
+                    onSelectRow={() => table.onSelectRow(row._id)}
+                    onViewRow={() => handleViewRow(row._id)}
+                    onEditRow={() => handleEditRow(row._id)}
+                    onDeleteRow={() => handleDeleteRow(row._id)}
+                  />
+                ))}
 
                 <TableEmptyRows
                   height={denseHeight}
@@ -231,15 +228,14 @@ export default function EmployeeListView() {
           </Scrollbar>
         </TableContainer>
 
-        <TablePaginationCustom
-          count={dataFiltered.length}
-          page={table.page}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.onChangePage}
-          onRowsPerPageChange={table.onChangeRowsPerPage}
-          //
-          dense={table.dense}
-          onChangeDense={table.onChangeDense}
+        <TablePagination
+          component="div"
+          count={totalDocs}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 25, 50]}
         />
       </Card>
     </Container>

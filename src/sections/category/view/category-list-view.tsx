@@ -90,7 +90,7 @@ export default function CategoryListView() {
   const confirm = useBoolean();
   const { category, categoryLoading, categoryError, categoryValidating, totalDocs } =
     useGetCategories(filters);
-  console.log('category', category);
+  // console.log('category', category);
   const [tableData, setTableData] = useState<ICategory[]>([]);
 
   const [page, setPage] = useState(0); // MUI uses 0-based page index

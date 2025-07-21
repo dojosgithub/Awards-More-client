@@ -19,6 +19,8 @@ export type IEmployeeTableFilters = {
   role: string;
   startDate: Date | null;
   endDate: Date | null;
+  page?: number;
+  limit?: number;
 };
 export type IEmployeeItem = {
   employeeId: string;

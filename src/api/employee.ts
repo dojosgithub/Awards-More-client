@@ -28,11 +28,12 @@ export function useGetEmployees(filters: IEmployeeTableFilters) {
   return useMemo(
     () => ({
       employees: (data?.docs as IEmployee[]) || [],
+      totalDocs: data?.totalDocs || 0,
       employeesLoading: isLoading,
       employeesError: error,
       employeesValidating: isValidating,
     }),
-    [data?.docs, error, isLoading, isValidating]
+    [data, isLoading, error, isValidating]
   );
 }
 
