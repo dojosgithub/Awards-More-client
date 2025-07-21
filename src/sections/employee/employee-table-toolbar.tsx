@@ -12,7 +12,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 // types
-import { IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { IInvoiceTableFilterValue } from 'src/types/category';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';

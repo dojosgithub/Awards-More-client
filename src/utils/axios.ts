@@ -41,8 +41,8 @@ export const endpoints = {
     details: '/api/mail/details',
     labels: '/api/mail/labels',
   },
-  post: {
-    list: '/api/post/list',
+  category: {
+    list: '/api/admin/categories',
     details: '/api/post/details',
     latest: '/api/post/latest',
     search: '/api/post/search',

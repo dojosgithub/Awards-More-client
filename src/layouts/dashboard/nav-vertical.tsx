@@ -14,6 +14,7 @@ import Scrollbar from 'src/components/scrollbar';
 import { usePathname } from 'src/routes/hooks';
 import { NavSectionVertical } from 'src/components/nav-section';
 //
+import { useAuthContext } from 'src/auth/hooks';
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import { NavToggleButton, NavUpgrade } from '../_common';
@@ -26,7 +27,7 @@ type Props = {
 };
 
 export default function NavVertical({ openNav, onCloseNav }: Props) {
-  const { user } = useMockedUser();
+  const { user } = useAuthContext();
 
   const pathname = usePathname();
 
@@ -67,12 +68,18 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
       >
         <Avatar sx={{ width: 40, height: 40, backgroundColor: '#FF4842' }} />
         <Box sx={{ pl: 2 }}>
-          <Typography sx={{ color: '#212B36', fontWeight: 600, fontSize: '14px' }}>
-            Muhammad Mubashir
-          </Typography>
-          <Typography sx={{ color: '#637381', fontWeight: 400, fontSize: '14px' }}>
-            Admin
-          </Typography>
+          {user && (
+            <>
+              <Typography sx={{ color: '#212B36', fontWeight: 600, fontSize: '14px' }}>
+                {`${user.firstName.charAt(0).toUpperCase()}${user.firstName.slice(
+                  1
+                )} ${user.lastName.charAt(0).toUpperCase()}${user.lastName.slice(1)}`}
+              </Typography>
+              <Typography sx={{ color: '#637381', fontWeight: 400, fontSize: '14px' }}>
+                {user.role}
+              </Typography>
+            </>
+          )}
         </Box>
       </Box>
       <NavSectionVertical

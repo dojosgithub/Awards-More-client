@@ -43,7 +43,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { IInvoice, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 import CustomButton from 'src/components/button/CustomButton';
 import { RHFUploadExcel } from 'src/components/hook-form/rhf-upload-excel';
 import ProductTableToolbar from '../product-table-toolbar';
@@ -74,12 +74,13 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-const defaultFilters: IInvoiceTableFilters = {
+const defaultFilters: ICategoryTableFilters = {
   name: '',
   service: [],
   status: 'all',
   startDate: null,
   endDate: null,
+  role: '',
 };
 
 // ----------------------------------------------------------------------
@@ -305,7 +306,7 @@ function applyFilter({
 }: {
   inputData: IInvoice[];
   comparator: (a: any, b: any) => number;
-  filters: IInvoiceTableFilters;
+  filters: ICategoryTableFilters;
   dateError: boolean;
 }) {
   const { name, status, service, startDate, endDate } = filters;

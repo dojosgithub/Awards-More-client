@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import Stack, { StackProps } from '@mui/material/Stack';
 // types
-import { IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 // components
 import Iconify from 'src/components/iconify';
 import { shortDateLabel } from 'src/components/custom-date-range-picker';
@@ -13,7 +13,7 @@ import { shortDateLabel } from 'src/components/custom-date-range-picker';
 // ----------------------------------------------------------------------
 
 type Props = StackProps & {
-  filters: IInvoiceTableFilters;
+  filters: ICategoryTableFilters;
   onFilters: (name: string, value: IInvoiceTableFilterValue) => void;
   //
   onResetFilters: VoidFunction;

@@ -1,33 +1,25 @@
-import sumBy from 'lodash/sumBy';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
+
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
+
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { Box, Modal } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fTimestamp } from 'src/utils/format-time';
 // _mock
 import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
+
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
@@ -39,13 +31,12 @@ import {
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
-  TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { ICategory, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 //
 import CustomButton from 'src/components/button/CustomButton';
+import { useGetCategories } from 'src/api/categories';
 import CategoryNewEditForm from '../category-new-edit-form';
 import CategoryTableToolbar from '../category-table-toolbar';
 import CategoryTableRow from '../category-table-row';
@@ -70,12 +61,13 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-const defaultFilters: IInvoiceTableFilters = {
+const defaultFilters: ICategoryTableFilters = {
   name: '',
   service: [],
   status: 'all',
   startDate: null,
   endDate: null,
+  role: '',
 };
 
 // ----------------------------------------------------------------------
@@ -88,12 +80,14 @@ export default function CategoryListView() {
   const router = useRouter();
 
   const table = useTable({ defaultOrderBy: '' });
+  const [filters, setFilters] = useState<ICategoryTableFilters>(defaultFilters);
 
   const confirm = useBoolean();
+  const { category, categoryLoading, categoryError, categoryValidating, categoryEmpty } =
+    useGetCategories(filters);
+  console.log('category', category);
+  const [tableData, setTableData] = useState<ICategory[]>([]);
 
-  const [tableData, setTableData] = useState(_invoices);
-
-  const [filters, setFilters] = useState(defaultFilters);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -101,7 +95,11 @@ export default function CategoryListView() {
     filters.startDate && filters.endDate
       ? filters.startDate.getTime() > filters.endDate.getTime()
       : false;
-
+  useEffect(() => {
+    if (category.length) {
+      setTableData(category);
+    }
+  }, [category]);
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
@@ -137,7 +135,7 @@ export default function CategoryListView() {
 
   const handleDeleteRow = useCallback(
     (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
+      const deleteRow = tableData.filter((row) => row._id !== id);
       setTableData(deleteRow);
 
       table.onUpdatePageDeleteRow(dataInPage.length);
@@ -146,7 +144,7 @@ export default function CategoryListView() {
   );
 
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row._id));
     setTableData(deleteRows);
 
     table.onUpdatePageDeleteRows({
@@ -213,7 +211,7 @@ export default function CategoryListView() {
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      tableData.map((row) => row._id)
                     )
                   }
                 />
@@ -226,13 +224,13 @@ export default function CategoryListView() {
                     )
                     .map((row) => (
                       <CategoryTableRow
-                        key={row.id}
+                        key={row._id}
                         row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onViewRow={() => handleViewRow(row.id)}
-                        onEditRow={() => handleEditRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
+                        selected={table.selected.includes(row._id)}
+                        onSelectRow={() => table.onSelectRow(row._id)}
+                        onViewRow={() => handleViewRow(row._id)}
+                        onEditRow={() => handleEditRow(row._id)}
+                        onDeleteRow={() => handleDeleteRow(row._id)}
                       />
                     ))}
 
@@ -318,9 +316,9 @@ function applyFilter({
   filters,
   dateError,
 }: {
-  inputData: IInvoice[];
+  inputData: ICategory[];
   comparator: (a: any, b: any) => number;
-  filters: IInvoiceTableFilters;
+  filters: ICategoryTableFilters;
   dateError: boolean;
 }) {
   const { name, status, service, startDate, endDate } = filters;
@@ -337,21 +335,21 @@ function applyFilter({
 
   if (name) {
     inputData = inputData.filter(
-      (invoice) =>
-        invoice.invoiceNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        invoice.invoiceTo.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (category) =>
+        category.title.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
+        category.title.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
   if (status !== 'all') {
-    inputData = inputData.filter((invoice) => invoice.status === status);
+    inputData = inputData.filter((category) => category.status === status);
   }
 
-  if (service.length) {
-    inputData = inputData.filter((invoice) =>
-      invoice.items.some((filterItem) => service.includes(filterItem.service))
-    );
-  }
+  // if (service.length) {
+  //   inputData = inputData.filter((category) =>
+  //     category.items.some((filterItem) => service.includes(filterItem.service))
+  //   );
+  // }
 
   return inputData;
 }

@@ -4,12 +4,13 @@ import { IAddressItem } from './address';
 
 export type IInvoiceTableFilterValue = string | string[] | Date | null;
 
-export type IInvoiceTableFilters = {
+export type ICategoryTableFilters = {
   name: string;
   service: string[];
   status: string;
   startDate: Date | null;
   endDate: Date | null;
+  role: string;
 };
 
 // ----------------------------------------------------------------------
@@ -39,4 +40,14 @@ export type IInvoice = {
   items: IInvoiceItem[];
   invoiceTo: IAddressItem;
   invoiceFrom: IAddressItem;
+};
+
+export type ICategory = {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  status: 'Active' | 'Inactive';
+  createdAt: string;
+  updatedAt: string;
 };

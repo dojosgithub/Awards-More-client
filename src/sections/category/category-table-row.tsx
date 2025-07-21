@@ -17,7 +17,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 // types
-import { IInvoice } from 'src/types/category';
+import { ICategory, IInvoice } from 'src/types/category';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -27,7 +27,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IInvoice;
+  row: ICategory;
   selected: boolean;
   onSelectRow: VoidFunction;
   onViewRow: VoidFunction;
@@ -43,7 +43,7 @@ export default function CategoryTableRow({
   onEditRow,
   onDeleteRow,
 }: Props) {
-  const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalAmount } = row;
+  const { _id, title, description, imageUrl, status, createdAt, updatedAt } = row;
 
   const confirm = useBoolean();
 
@@ -53,30 +53,20 @@ export default function CategoryTableRow({
     <>
       <TableRow hover selected={selected}>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={invoiceTo.name} sx={{ mr: 2 }}>
-            {invoiceTo.name.charAt(0).toUpperCase()}
+          <Avatar
+            // alt={invoiceTo.name}
+            sx={{ mr: 2 }}
+          >
+            {imageUrl}
           </Avatar>
         </TableCell>
 
-        <TableCell>Shaista Raees</TableCell>
+        <TableCell>{title}</TableCell>
+
+        <TableCell>{description}</TableCell>
 
         <TableCell>
-          Shaista Raees teaches Operations Research and Simulation and seems to enjoy failing
-          students a bit too much
-        </TableCell>
-
-        <TableCell>
-          <Label
-            variant="soft"
-            color={
-              (status === 'paid' && 'success') ||
-              (status === 'pending' && 'warning') ||
-              (status === 'overdue' && 'error') ||
-              'default'
-            }
-          >
-            {status}
-          </Label>
+          <Label variant="soft">{status}</Label>
         </TableCell>
 
         <TableCell sx={{ px: 1 }}>

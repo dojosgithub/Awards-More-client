@@ -12,7 +12,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 // types
-import { IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
@@ -20,7 +20,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 // ----------------------------------------------------------------------
 
 type Props = {
-  filters: IInvoiceTableFilters;
+  filters: ICategoryTableFilters;
   onFilters: (name: string, value: IInvoiceTableFilterValue) => void;
   //
   dateError: boolean;

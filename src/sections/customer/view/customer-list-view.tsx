@@ -43,7 +43,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { ICategoryTableFilters, IInvoice, IInvoiceTableFilterValue } from 'src/types/category';
 //
 import CustomButton from 'src/components/button/CustomButton';
 
@@ -60,12 +60,13 @@ const TABLE_HEAD = [
   { id: 'datecreated', label: 'Date Created' },
 ];
 
-const defaultFilters: IInvoiceTableFilters = {
+const defaultFilters: ICategoryTableFilters = {
   name: '',
   service: [],
   status: 'all',
   startDate: null,
   endDate: null,
+  role: '',
 };
 
 // ----------------------------------------------------------------------
@@ -275,7 +276,7 @@ function applyFilter({
 }: {
   inputData: IInvoice[];
   comparator: (a: any, b: any) => number;
-  filters: IInvoiceTableFilters;
+  filters: ICategoryTableFilters;
   dateError: boolean;
 }) {
   const { name, status, service, startDate, endDate } = filters;

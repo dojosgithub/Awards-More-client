@@ -44,7 +44,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IInvoice, IInvoiceTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { IInvoice, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 //
 import CustomButton from 'src/components/button/CustomButton';
 
@@ -97,8 +97,7 @@ export default function EmployeeListView() {
       setTableData(employees);
     }
   }, [employees]);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+
   const dateError =
     filters.startDate && filters.endDate
       ? filters.startDate.getTime() > filters.endDate.getTime()
@@ -110,11 +109,6 @@ export default function EmployeeListView() {
     filters,
     dateError,
   });
-
-  const dataInPage = dataFiltered.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
-  );
 
   const denseHeight = table.dense ? 56 : 76;
 
