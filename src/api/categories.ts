@@ -26,12 +26,13 @@ export function useGetCategories(filters: ICategoryTableFilters) {
   const memoizedValue = useMemo(
     () => ({
       category: (data?.docs as ICategory[]) || [],
+      totalDocs: data?.totalDocs || 0,
       categoryLoading: isLoading,
       categoryError: error,
       categoryValidating: isValidating,
       categoryEmpty: !isLoading && !data?.docs.length,
     }),
-    [data?.docs, error, isLoading, isValidating]
+    [data, error, isLoading, isValidating]
   );
 
   return memoizedValue;

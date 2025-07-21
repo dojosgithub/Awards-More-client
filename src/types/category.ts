@@ -11,6 +11,9 @@ export type ICategoryTableFilters = {
   startDate: Date | null;
   endDate: Date | null;
   role: string;
+  search?: string;
+  page?: number;
+  limit?: number;
 };
 
 // ----------------------------------------------------------------------

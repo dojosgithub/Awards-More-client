@@ -10,7 +10,7 @@ import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // routes
-import { Box, Modal } from '@mui/material';
+import { Box, Modal, TablePagination } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 // hooks
@@ -31,6 +31,7 @@ import {
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
+  TablePaginationCustom,
 } from 'src/components/table';
 // types
 import { ICategory, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
@@ -80,13 +81,21 @@ export default function CategoryListView() {
   const router = useRouter();
 
   const table = useTable({ defaultOrderBy: '' });
-  const [filters, setFilters] = useState<ICategoryTableFilters>(defaultFilters);
+  const [filters, setFilters] = useState<ICategoryTableFilters>({
+    ...defaultFilters,
+    page: 1,
+    limit: 10,
+  });
 
   const confirm = useBoolean();
-  const { category, categoryLoading, categoryError, categoryValidating, categoryEmpty } =
+  const { category, categoryLoading, categoryError, categoryValidating, totalDocs } =
     useGetCategories(filters);
   console.log('category', category);
   const [tableData, setTableData] = useState<ICategory[]>([]);
+
+  const [page, setPage] = useState(0); // MUI uses 0-based page index
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [limit, setLimit] = useState(10);
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -168,6 +177,17 @@ export default function CategoryListView() {
     [router]
   );
 
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+    setFilters((prev) => ({ ...prev, page: newPage + 1 })); // API expects 1-based page
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLimit = parseInt(event.target.value, 10);
+    setRowsPerPage(newLimit);
+    setPage(0);
+    setFilters((prev) => ({ ...prev, page: 1, limit: newLimit }));
+  };
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -245,16 +265,15 @@ export default function CategoryListView() {
             </Scrollbar>
           </TableContainer>
 
-          {/* <TablePaginationCustom
-            count={dataFiltered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            //
-            dense={table.dense}
-            onChangeDense={table.onChangeDense}
-          /> */}
+          <TablePagination
+            component="div"
+            count={totalDocs}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+          />
         </Card>
       </Container>
 
