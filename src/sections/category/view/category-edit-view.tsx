@@ -8,6 +8,7 @@ import { _invoices } from 'src/_mock';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import { useGetCategory } from 'src/api/categories';
 import CategoryNewEditForm from '../category-new-edit-form';
 
 // ----------------------------------------------------------------------
@@ -18,6 +19,8 @@ type Props = {
 
 export default function CategoryEditView({ id }: Props) {
   const settings = useSettingsContext();
+  const { category: currentCategory } = useGetCategory(id);
+  // console.log('currentCategory', currentCategory);
 
   const currentInvoice = _invoices.find((invoice) => invoice.id === id);
 
@@ -41,7 +44,7 @@ export default function CategoryEditView({ id }: Props) {
         }}
       />
 
-      <CategoryNewEditForm />
+      <CategoryNewEditForm currentCategory={currentCategory} />
     </Container>
   );
 }

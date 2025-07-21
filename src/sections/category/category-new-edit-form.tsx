@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -7,69 +7,121 @@ import Stack from '@mui/material/Stack';
 import { Button, Typography } from '@mui/material';
 
 import { LoadingButton } from '@mui/lab';
+import { enqueueSnackbar } from 'notistack';
 import { useRouter } from 'src/routes/hooks';
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
+import { createCategory, updateCategory } from 'src/api/categories';
+import { ICategoryItem } from 'src/types/category';
+import { paths } from 'src/routes/paths';
 
-// ✅ Step 1: Yup Schema
-const CategorySchema = Yup.object({
-  title: Yup.string().required('Title is required'),
-  description: Yup.string().required('Description is required'),
-  coverUrl: Yup.mixed<any>().nullable().required('Cover is required'),
-});
+type Props = {
+  currentCategory?: ICategoryItem;
+};
+type FormValuesProps = {
+  title: string;
+  description: string;
 
-// ✅ Step 2: Infer FormValues from schema directly
-type FormValues = Yup.InferType<typeof CategorySchema>;
+  file: any;
+};
 
-export default function CategoryNewEditForm() {
+export default function CategoryNewEditForm({ currentCategory }: Props) {
   const router = useRouter();
 
-  const defaultValues = useMemo<FormValues>(
+  const CategorySchema = Yup.object({
+    title: Yup.string().required('Title is required'),
+    description: Yup.string().required('Description is required'),
+    file: Yup.mixed<File>()
+      .required('File is required')
+      .test('fileType', 'Unsupported File Format', (value) => {
+        if (!value) return false;
+        return ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type);
+      })
+      .defined(),
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const defaultValues = useMemo<FormValuesProps>(
     () => ({
-      title: '',
-      description: '',
-      coverUrl: null,
+      title: currentCategory?.title || '',
+      description: currentCategory?.description || '',
+      file: currentCategory?.imageUrl || null,
     }),
-    []
+    [currentCategory]
   );
 
-  const methods = useForm({
+  const methods = useForm<FormValuesProps>({
     resolver: yupResolver(CategorySchema),
+    defaultValues,
   });
+
   const {
+    watch,
     reset,
     setValue,
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
 
-  const onSubmit = async (data: FormValues) => {
-    try {
-      console.log('Form submitted:', data);
-      // your API call here...
+  const values = watch();
+  console.log(values);
 
-      reset();
+  useEffect(() => {
+    // Reset form when currentCategory or defaultValues change
+    reset(defaultValues);
+  }, [currentCategory, defaultValues, reset]);
+
+  const onSubmit = handleSubmit(async (data) => {
+    const formData = new FormData();
+
+    try {
+      // Append string fields
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+
+      if (data.file && typeof data.file === 'object' && 'type' in data.file) {
+        formData.append('file', data.file as File);
+      } else {
+        formData.append('file', '');
+      }
+
+      // Debug log
+      formData.forEach((value, key) => {
+        console.log(`${key}:`, value);
+      });
+
+      if (currentCategory) {
+        await updateCategory(formData, currentCategory._id);
+        enqueueSnackbar('Category updated successfully!');
+      } else {
+        await createCategory(formData);
+        enqueueSnackbar('Category created successfully!');
+      }
+
+      // Redirect in both cases
+      router.push(paths.dashboard.category.root);
     } catch (error) {
-      console.error('Submit failed:', error);
+      enqueueSnackbar('Error saving employee. Please try again.', { variant: 'error' });
+      console.error('Submission error:', error);
     }
-  };
+  });
 
   const handleDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
-      const newFile = Object.assign(file, {
+      if (!file) return;
+
+      const fileWithPreview = Object.assign(file, {
         preview: URL.createObjectURL(file),
       });
-      setValue('coverUrl', newFile, { shouldValidate: true });
+
+      setValue('file', fileWithPreview as unknown as File, { shouldValidate: true });
     },
     [setValue]
   );
 
-  const handleRemoveFile = useCallback(() => {
-    setValue('coverUrl', null);
-  }, [setValue]);
+  const handleRemoveFile = useCallback(() => setValue('file', null), [setValue]);
 
   return (
-    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+    <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack spacing={3}>
         <RHFTextField name="title" label="Title" />
         <RHFTextField name="description" label="Description" multiline rows={3} />
@@ -77,7 +129,7 @@ export default function CategoryNewEditForm() {
         <Stack spacing={1.5}>
           <Typography variant="subtitle2">Upload Picture</Typography>
           <RHFUpload
-            name="coverUrl"
+            name="file"
             maxSize={3145728}
             onDrop={handleDrop}
             onDelete={handleRemoveFile}

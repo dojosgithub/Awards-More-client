@@ -54,3 +54,11 @@ export type ICategory = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type ICategoryItem = {
+  title: string;
+  description: string;
+  _id: string;
+  file: any;
+  imageUrl?: string;
+};

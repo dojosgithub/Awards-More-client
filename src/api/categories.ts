@@ -1,10 +1,10 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 // utils
-import { fetcher, endpoints } from 'src/utils/axios';
+import axios, { fetcher, endpoints } from 'src/utils/axios';
 // types
 import { IPostItem } from 'src/types/blog';
-import { ICategory, ICategoryTableFilters } from 'src/types/category';
+import { ICategory, ICategoryItem, ICategoryTableFilters } from 'src/types/category';
 
 // ----------------------------------------------------------------------
 function buildQueryParams(filters: ICategoryTableFilters) {
@@ -39,65 +39,49 @@ export function useGetCategories(filters: ICategoryTableFilters) {
 }
 
 // ----------------------------------------------------------------------
+// add category
+export async function createCategory(formData: FormData) {
+  console.log('apidata', formData);
+  const url = endpoints.category.add;
+  const response = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 
-// export function useGetPost(title: string) {
-//   const URL = title ? [endpoints.category.details, { params: { title } }] : null;
+  return response.data;
+}
+// update category
+export async function updateCategory(formData: FormData, employeeId: string) {
+  console.log('apidata', formData);
 
-//   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+  // Replace :id with actual employeeId in the URL
+  const url = endpoints.category.update.replace(':id', employeeId);
 
-//   const memoizedValue = useMemo(
-//     () => ({
-//       category: data?.category as IPostItem,
-//       postLoading: isLoading,
-//       postError: error,
-//       postValidating: isValidating,
-//     }),
-//     [data?.category, error, isLoading, isValidating]
-//   );
+  const response = await axios.put(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 
-//   return memoizedValue;
-// }
+  return response.data;
+}
 
-// ----------------------------------------------------------------------
+// single category
+export function useGetCategory(id: string) {
+  const URL = id ? endpoints.category.details.replace(':id', id) : null;
 
-// export function useGetLatestPosts(title: string) {
-//   const URL = title ? [endpoints.category.latest, { params: { title } }] : null;
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
 
-//   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+  const memoizedValue = useMemo(
+    () => ({
+      category: data?.data as ICategoryItem,
+      categoryLoading: isLoading,
+      categoryError: error,
+      categoryValidating: isValidating,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
 
-//   const memoizedValue = useMemo(
-//     () => ({
-//       latestPosts: (data?.latestPosts as IPostItem[]) || [],
-//       latestPostsLoading: isLoading,
-//       latestPostsError: error,
-//       latestPostsValidating: isValidating,
-//       latestPostsEmpty: !isLoading && !data?.latestPosts.length,
-//     }),
-//     [data?.latestPosts, error, isLoading, isValidating]
-//   );
-
-//   return memoizedValue;
-// }
-
-// ----------------------------------------------------------------------
-
-// export function useSearchPosts(query: string) {
-//   const URL = query ? [endpoints.category.search, { params: { query } }] : null;
-
-//   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, {
-//     keepPreviousData: true,
-//   });
-
-//   const memoizedValue = useMemo(
-//     () => ({
-//       searchResults: (data?.results as IPostItem[]) || [],
-//       searchLoading: isLoading,
-//       searchError: error,
-//       searchValidating: isValidating,
-//       searchEmpty: !isLoading && !data?.results.length,
-//     }),
-//     [data?.results, error, isLoading, isValidating]
-//   );
-
-//   return memoizedValue;
-// }
+  return memoizedValue;
+}

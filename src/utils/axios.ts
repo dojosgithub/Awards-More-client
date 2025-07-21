@@ -43,7 +43,11 @@ export const endpoints = {
   },
   category: {
     list: '/api/admin/categories',
-    details: '/api/post/details',
+    add: '/api/admin/add-category',
+    update: '/api/admin/category/:id',
+
+    details: '/api/admin/category/:id',
+
     latest: '/api/post/latest',
     search: '/api/post/search',
   },
