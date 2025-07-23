@@ -65,6 +65,7 @@ export const endpoints = {
   },
   customer: {
     list: '/api/customer/customers',
+    details: '/api/customer/customer/:id',
   },
   product: {
     list: '/api/admin/products',

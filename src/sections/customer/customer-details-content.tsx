@@ -10,12 +10,15 @@ import {
   useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2'; // Using Grid v2
+import { ICustomer } from 'src/types/customers';
 
 type InfoRowProps = {
   label: string;
   value: string;
 };
-
+type Props = {
+  customer: ICustomer;
+};
 const InfoRow: React.FC<InfoRowProps> = ({ label, value }) => (
   <Stack direction="row" spacing={2} alignItems="flex-start">
     <Typography
@@ -35,7 +38,23 @@ const InfoRow: React.FC<InfoRowProps> = ({ label, value }) => (
   </Stack>
 );
 
-export default function CustomerDetailsContent() {
+export default function CustomerDetailsContent({ customer }: Props) {
+  const {
+    _id,
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    address,
+    quickbooksId,
+    password,
+    account_Type,
+    orders,
+    role,
+    imageUrl,
+    createdAt,
+    updatedAt,
+  } = customer;
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -50,18 +69,18 @@ export default function CustomerDetailsContent() {
       <Box sx={{ display: 'flex', alignItems: 'center', pb: 2 }}>
         <Avatar />
         <Typography pl={2} pt={1} fontWeight={600}>
-          Name
+          {`${firstName} ${lastName}`}
         </Typography>
       </Box>
       <Divider />
       <Stack spacing={2} pt={2}>
-        <InfoRow label="Email" value="example@gmail.com" />
-        <InfoRow label="Phone Number" value="032323323232" />
-        <InfoRow label="Shipping Address" value="305 SE 3rd Ave. Mineral Wells, TX 76067" />
+        <InfoRow label="Email" value={email} />
+        <InfoRow label="Phone Number" value={phoneNumber} />
+        <InfoRow label="Shipping Address" value={address} />
         <Divider />
-        <InfoRow label="Billing Address" value="305 SE 3rd Ave. Mineral Wells, TX 76067" />
-        <InfoRow label="Phone Number" value="323232323232" />
-        <InfoRow label="Email" value="admin@dw.com" />
+        <InfoRow label="Billing Address" value={address} />
+        <InfoRow label="Phone Number" value={phoneNumber} />
+        <InfoRow label="Email" value={email} />
       </Stack>
     </Card>
   );

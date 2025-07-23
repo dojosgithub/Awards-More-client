@@ -39,6 +39,23 @@ export function useGetCustomers(filters: ICustomerTableFilters) {
   );
 }
 
+export function useGetCustomer(id: string) {
+  const URL = id ? endpoints.customer.details.replace(':id', id) : null;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      customer: data?.data as ICustomer,
+      customerLoading: isLoading,
+      customerError: error,
+      customerValidating: isValidating,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
 // add employee
 export async function createEmployee(formData: FormData) {
   console.log('apidata', formData);

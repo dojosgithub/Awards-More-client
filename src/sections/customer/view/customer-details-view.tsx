@@ -8,6 +8,7 @@ import { useSettingsContext } from 'src/components/settings';
 //
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { OrderListView } from 'src/sections/order/view';
+import { useGetCustomer } from 'src/api/customers';
 import CustomerDetailsContent from '../customer-details-content';
 
 // ----------------------------------------------------------------------
@@ -18,6 +19,7 @@ type Props = {
 
 export default function CustomerDetailsView({ id }: Props) {
   const settings = useSettingsContext();
+  const { customer } = useGetCustomer(id);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -38,7 +40,7 @@ export default function CustomerDetailsView({ id }: Props) {
         }}
       />
       <Box sx={{ pl: 3 }}>
-        <CustomerDetailsContent />
+        <CustomerDetailsContent customer={customer} />
       </Box>
       <Box sx={{ pt: 3 }}>
         <OrderListView orderId={id} />

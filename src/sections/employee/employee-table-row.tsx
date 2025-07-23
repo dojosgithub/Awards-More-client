@@ -97,7 +97,7 @@ export default function EmployeeTableRow({
         arrow="right-top"
         sx={{ width: 160 }}
       >
-        {/* <MenuItem
+        <MenuItem
           onClick={() => {
             onViewRow();
             popover.onClose();
@@ -105,7 +105,7 @@ export default function EmployeeTableRow({
         >
           <Iconify icon="solar:eye-bold" />
           View
-        </MenuItem> */}
+        </MenuItem>
 
         <MenuItem
           onClick={() => {
