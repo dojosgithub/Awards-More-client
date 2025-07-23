@@ -15,8 +15,13 @@ function buildQueryParams(filters: ICategoryTableFilters) {
   if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
   if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
 
+  // 🔥 Add these lines
+  if (filters.page) params.append('page', filters.page.toString());
+  if (filters.limit) params.append('limit', filters.limit.toString());
+
   return params.toString();
 }
+
 export function useGetCategories(filters: ICategoryTableFilters) {
   const query = buildQueryParams(filters);
   const URL = `${endpoints.category.list}?${query}`;

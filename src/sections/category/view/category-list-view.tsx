@@ -110,12 +110,7 @@ export default function CategoryListView() {
       setTableData(category);
     }
   }, [category]);
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
+  const dataFiltered = tableData;
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -184,7 +179,7 @@ export default function CategoryListView() {
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
-    setFilters((prev) => ({ ...prev, page: newPage + 1 })); // API expects 1-based page
+    setFilters((prev) => ({ ...prev, page: newPage + 1 }));
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,6 +188,7 @@ export default function CategoryListView() {
     setPage(0);
     setFilters((prev) => ({ ...prev, page: 1, limit: newLimit }));
   };
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -242,22 +238,17 @@ export default function CategoryListView() {
                 />
 
                 <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <CategoryTableRow
-                        key={row._id}
-                        row={row}
-                        selected={table.selected.includes(row._id)}
-                        onSelectRow={() => table.onSelectRow(row._id)}
-                        onViewRow={() => handleViewRow(row._id)}
-                        onEditRow={() => handleEditRow(row._id)}
-                        onDeleteRow={() => handleDeleteRow(row._id)}
-                      />
-                    ))}
+                  {dataFiltered.map((row) => (
+                    <CategoryTableRow
+                      key={row._id}
+                      row={row}
+                      selected={table.selected.includes(row._id)}
+                      onSelectRow={() => table.onSelectRow(row._id)}
+                      onViewRow={() => handleViewRow(row._id)}
+                      onEditRow={() => handleEditRow(row._id)}
+                      onDeleteRow={() => handleDeleteRow(row._id)}
+                    />
+                  ))}
 
                   <TableEmptyRows
                     height={denseHeight}
@@ -277,7 +268,8 @@ export default function CategoryListView() {
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rowsPerPageOptions={[]} // Hide dropdown
+            labelRowsPerPage="" // Hide label
           />
         </Card>
       </Container>
