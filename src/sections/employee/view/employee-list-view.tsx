@@ -95,12 +95,7 @@ export default function EmployeeListView() {
       ? filters.startDate.getTime() > filters.endDate.getTime()
       : false;
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
+  const dataFiltered = tableData;
 
   const denseHeight = table.dense ? 56 : 76;
 
@@ -239,7 +234,8 @@ export default function EmployeeListView() {
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[]} // Hide dropdown
+          labelRowsPerPage="" // Hide label
         />
       </Card>
     </Container>
