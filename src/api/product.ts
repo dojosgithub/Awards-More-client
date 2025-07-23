@@ -14,7 +14,8 @@ function buildQueryParams(filters: IProductTableFilters) {
   if (filters.role && filters.role !== 'all') params.append('role', filters.role);
   if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
   if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
-
+  if (filters.page) params.append('page', filters.page.toString());
+  if (filters.limit) params.append('limit', filters.limit.toString());
   return params.toString();
 }
 export function useGetProducts(filters: IProductTableFilters) {

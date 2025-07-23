@@ -59,7 +59,7 @@ export default function ProductTableRow({
 
         <TableCell>{title}</TableCell>
 
-        <TableCell>{category}</TableCell>
+        <TableCell>{category?.title}</TableCell>
 
         <TableCell>{sku}</TableCell>
         <TableCell>{price}</TableCell>

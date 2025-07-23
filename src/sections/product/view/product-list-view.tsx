@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 
@@ -9,7 +9,7 @@ import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // routes
-import { Box, Modal, Typography } from '@mui/material';
+import { Box, Modal, TablePagination, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -85,12 +85,15 @@ export default function ProductListView() {
   const table = useTable({ defaultOrderBy: '' });
 
   const confirm = useBoolean();
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState<IProductTableFilters>({
+    ...defaultFilters,
+    page: 1,
+    limit: 10,
+  });
 
   const { products, productsLoading, productsError, mutateProducts, totalDocs } =
     useGetProducts(filters);
-  console.log('products', products);
-  const [tableData, setTableData] = useState<IProduct[]>([]);
+  // console.log('products', products);
 
   const [page, setPage] = useState(0); // MUI uses 0-based page index
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -98,17 +101,19 @@ export default function ProductListView() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const [tableData, setTableData] = useState<IProduct[]>([]);
+  useEffect(() => {
+    if (products.length) {
+      setTableData(products);
+    }
+  }, [products]);
   const dateError =
     filters.startDate && filters.endDate
       ? filters.startDate.getTime() > filters.endDate.getTime()
       : false;
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
+  const dataFiltered = tableData;
+  console.log('dataFiltered', dataFiltered);
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -174,7 +179,17 @@ export default function ProductListView() {
     },
     [router]
   );
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+    setFilters((prev) => ({ ...prev, page: newPage + 1 })); // API expects 1-based page
+  };
 
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLimit = parseInt(event.target.value, 10);
+    setRowsPerPage(newLimit);
+    setPage(0);
+    setFilters((prev) => ({ ...prev, page: 1, limit: newLimit }));
+  };
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -229,7 +244,7 @@ export default function ProductListView() {
                 />
 
                 <TableBody>
-                  {products.map((row) => (
+                  {dataFiltered.map((row) => (
                     <ProductTableRow
                       key={row._id}
                       row={row}
@@ -252,16 +267,16 @@ export default function ProductListView() {
             </Scrollbar>
           </TableContainer>
 
-          {/* <TablePaginationCustom
-            count={dataFiltered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            //
-            dense={table.dense}
-            onChangeDense={table.onChangeDense}
-          /> */}
+          <TablePagination
+            component="div"
+            count={totalDocs}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[]}
+            labelRowsPerPage=""
+          />
         </Card>
       </Container>
 

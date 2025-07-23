@@ -88,11 +88,15 @@ export type IProductTableFilters = {
   status: string;
 };
 
+export type IProductCategory = {
+  _id: string;
+  title: string;
+};
 export type IProduct = {
   _id: string;
   imageUrl: string;
   title: string;
-  category: string;
+  category: IProductCategory;
   sku: string;
   price: string;
   minimumOrderQuantity: number;

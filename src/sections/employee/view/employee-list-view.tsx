@@ -81,7 +81,7 @@ export default function EmployeeListView() {
   const [page, setPage] = useState(0); // MUI uses 0-based page index
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { employees, mutateEmployees, totalDocs } = useGetEmployees(filters);
-  console.log(employees);
+  // console.log(employees);
 
   const [tableData, setTableData] = useState<IEmployee[]>([]);
   useEffect(() => {
@@ -234,8 +234,8 @@ export default function EmployeeListView() {
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[]} // Hide dropdown
-          labelRowsPerPage="" // Hide label
+          rowsPerPageOptions={[]}
+          labelRowsPerPage=""
         />
       </Card>
     </Container>

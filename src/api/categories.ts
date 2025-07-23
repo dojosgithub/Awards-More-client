@@ -15,7 +15,6 @@ function buildQueryParams(filters: ICategoryTableFilters) {
   if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
   if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
 
-  // 🔥 Add these lines
   if (filters.page) params.append('page', filters.page.toString());
   if (filters.limit) params.append('limit', filters.limit.toString());
 
