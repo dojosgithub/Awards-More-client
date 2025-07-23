@@ -12,16 +12,16 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 // types
-import { ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  filters: ICategoryTableFilters;
-  onFilters: (name: string, value: IInvoiceTableFilterValue) => void;
+  filters: IProductTableFilters;
+  onFilters: (name: string, value: IProductTableFilterValue) => void;
   //
   dateError: boolean;
   serviceOptions: string[];
@@ -53,19 +53,19 @@ export default function ProductTableToolbar({
     [onFilters]
   );
 
-  const handleFilterStartDate = useCallback(
-    (newValue: Date | null) => {
-      onFilters('startDate', newValue);
-    },
-    [onFilters]
-  );
+  // const handleFilterStartDate = useCallback(
+  //   (newValue: Date | null) => {
+  //     onFilters('startDate', newValue);
+  //   },
+  //   [onFilters]
+  // );
 
-  const handleFilterEndDate = useCallback(
-    (newValue: Date | null) => {
-      onFilters('endDate', newValue);
-    },
-    [onFilters]
-  );
+  // const handleFilterEndDate = useCallback(
+  //   (newValue: Date | null) => {
+  //     onFilters('endDate', newValue);
+  //   },
+  //   [onFilters]
+  // );
 
   return (
     <Stack

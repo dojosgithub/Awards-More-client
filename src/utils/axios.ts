@@ -64,8 +64,14 @@ export const endpoints = {
     search: '/api/post/search',
   },
   product: {
-    list: '/api/product/list',
-    details: '/api/product/details',
-    search: '/api/product/search',
+    list: '/api/admin/products',
+    add: '/api/admin/add-category',
+    update: '/api/admin/category/:id',
+    delete: '/api/admin/category/:id',
+
+    details: '/api/admin/category/:id',
+
+    latest: '/api/post/latest',
+    search: '/api/post/search',
   },
 };

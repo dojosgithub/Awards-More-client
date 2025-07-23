@@ -1,35 +1,25 @@
-import sumBy from 'lodash/sumBy';
 import { useState, useCallback } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
+
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
+
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { Box, Modal, Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fTimestamp } from 'src/utils/format-time';
 // _mock
 import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
@@ -39,13 +29,11 @@ import {
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
-  TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IInvoice, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
 import CustomButton from 'src/components/button/CustomButton';
-import { RHFUploadExcel } from 'src/components/hook-form/rhf-upload-excel';
+import { IProduct, IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
+import { useGetProduct, useGetProducts } from 'src/api/product';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableRow from '../product-table-row';
 import NewProductExcelUploadForm from './product-new-csv-form';
@@ -54,15 +42,15 @@ import NewProductExcelUploadForm from './product-new-csv-form';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'invoiceNumber', label: 'Image' },
-  { id: 'createDate', label: 'Title' },
-  { id: 'dueDate', label: 'Category' },
-  { id: 'price', label: 'SKU' },
+  { id: 'imageUrl', label: 'Image' },
+  { id: 'title', label: 'Title' },
+  { id: 'category', label: 'Category' },
+  { id: 'sku', label: 'SKU' },
   { id: 'price', label: 'Price' },
-  { id: 'price', label: 'Minimum' },
-
-  { id: 'status', label: 'Action' },
+  { id: 'minimumOrderQuantity', label: 'Minimum Order' },
+  { id: 'action', label: 'Action' },
 ];
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -74,13 +62,15 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-const defaultFilters: ICategoryTableFilters = {
+const defaultFilters: IProductTableFilters = {
   name: '',
-  service: [],
-  status: 'all',
   startDate: null,
   endDate: null,
   role: '',
+  stock: [],
+  publish: [],
+  service: '',
+  status: '',
 };
 
 // ----------------------------------------------------------------------
@@ -95,10 +85,16 @@ export default function ProductListView() {
   const table = useTable({ defaultOrderBy: '' });
 
   const confirm = useBoolean();
-
-  const [tableData, setTableData] = useState(_invoices);
-
   const [filters, setFilters] = useState(defaultFilters);
+
+  const { products, productsLoading, productsError, mutateProducts, totalDocs } =
+    useGetProducts(filters);
+  console.log('products', products);
+  const [tableData, setTableData] = useState<IProduct[]>([]);
+
+  const [page, setPage] = useState(0); // MUI uses 0-based page index
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -123,14 +119,14 @@ export default function ProductListView() {
 
   const canReset =
     !!filters.name ||
-    !!filters.service.length ||
+    // !!filters.service.length ||
     filters.status !== 'all' ||
     (!!filters.startDate && !!filters.endDate);
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleFilters = useCallback(
-    (name: string, value: IInvoiceTableFilterValue) => {
+    (name: string, value: IProductTableFilterValue) => {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
@@ -141,17 +137,21 @@ export default function ProductListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id: string) => {
+      try {
+        // await deleteCategory(id);
+        enqueueSnackbar('Product deleted successfully!');
+        mutateProducts();
+      } catch (error) {
+        console.error('Error deleting Product:', error);
+        enqueueSnackbar('Failed to delete Product', { variant: 'error' });
+      }
     },
-    [dataInPage.length, table, tableData]
+    [mutateProducts]
   );
 
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row._id));
     setTableData(deleteRows);
 
     table.onUpdatePageDeleteRows({
@@ -223,28 +223,23 @@ export default function ProductListView() {
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      tableData.map((row) => row._id)
                     )
                   }
                 />
 
                 <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <ProductTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onViewRow={() => handleViewRow(row.id)}
-                        onEditRow={() => handleEditRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                      />
-                    ))}
+                  {products.map((row) => (
+                    <ProductTableRow
+                      key={row._id}
+                      row={row}
+                      selected={table.selected.includes(row._id)}
+                      onSelectRow={() => table.onSelectRow(row._id)}
+                      onViewRow={() => handleViewRow(row._id)}
+                      onEditRow={() => handleEditRow(row._id)}
+                      onDeleteRow={() => handleDeleteRow(row._id)}
+                    />
+                  ))}
 
                   <TableEmptyRows
                     height={denseHeight}
@@ -304,39 +299,35 @@ function applyFilter({
   filters,
   dateError,
 }: {
-  inputData: IInvoice[];
+  inputData: IProduct[];
   comparator: (a: any, b: any) => number;
-  filters: ICategoryTableFilters;
+  filters: IProductTableFilters;
   dateError: boolean;
 }) {
-  const { name, status, service, startDate, endDate } = filters;
+  const { name, startDate, endDate } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
-
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
+    return order !== 0 ? order : a[1] - b[1];
   });
-
   inputData = stabilizedThis.map((el) => el[0]);
 
+  // Filter by name (title or sku)
   if (name) {
     inputData = inputData.filter(
-      (invoice) =>
-        invoice.invoiceNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        invoice.invoiceTo.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (item) =>
+        item.title.toLowerCase().includes(name.toLowerCase()) ||
+        item.sku.toLowerCase().includes(name.toLowerCase())
     );
   }
 
-  if (status !== 'all') {
-    inputData = inputData.filter((invoice) => invoice.status === status);
-  }
-
-  if (service.length) {
-    inputData = inputData.filter((invoice) =>
-      invoice.items.some((filterItem) => service.includes(filterItem.service))
-    );
+  // Date filtering (optional, based on createdAt)
+  if (startDate && endDate && !dateError) {
+    inputData = inputData.filter((item) => {
+      const createdAt = new Date(item.createdAt).getTime();
+      return createdAt >= startDate.getTime() && createdAt <= endDate.getTime();
+    });
   }
 
   return inputData;

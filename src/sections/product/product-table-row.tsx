@@ -23,16 +23,17 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { IProduct } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IInvoice;
+  row: IProduct;
   selected: boolean;
   onSelectRow: VoidFunction;
-  onViewRow: VoidFunction;
   onEditRow: VoidFunction;
   onDeleteRow: VoidFunction;
+  onViewRow: VoidFunction;
 };
 
 export default function ProductTableRow({
@@ -43,7 +44,7 @@ export default function ProductTableRow({
   onEditRow,
   onDeleteRow,
 }: Props) {
-  const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalAmount } = row;
+  const { _id, imageUrl, title, category, sku, price, minimumOrderQuantity } = row;
 
   const confirm = useBoolean();
 
@@ -53,18 +54,16 @@ export default function ProductTableRow({
     <>
       <TableRow hover selected={selected}>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={invoiceTo.name} sx={{ mr: 2 }}>
-            {invoiceTo.name.charAt(0).toUpperCase()}
-          </Avatar>
+          <Avatar sx={{ mr: 2 }}>{imageUrl}</Avatar>
         </TableCell>
 
-        <TableCell>Shaista Raees</TableCell>
+        <TableCell>{title}</TableCell>
 
-        <TableCell>Apple</TableCell>
+        <TableCell>{category}</TableCell>
 
-        <TableCell>SkU6343</TableCell>
-        <TableCell>$4343</TableCell>
-        <TableCell>5</TableCell>
+        <TableCell>{sku}</TableCell>
+        <TableCell>{price}</TableCell>
+        <TableCell>{minimumOrderQuantity}</TableCell>
 
         <TableCell sx={{ px: 1 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>

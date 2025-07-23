@@ -78,4 +78,27 @@ export type IProductTableFilters = {
   name: string;
   stock: string[];
   publish: string[];
+  role: string;
+  startDate: Date | null;
+  endDate: Date | null;
+  search?: string;
+  page?: number;
+  limit?: number;
+  service?: string;
+  status: string;
+};
+
+export type IProduct = {
+  _id: string;
+  imageUrl: string;
+  title: string;
+  category: string;
+  sku: string;
+  price: string;
+  minimumOrderQuantity: number;
+  description: string;
+  quickbooksItemId: string;
+  qtyOnHand: number;
+  createdAt: string;
+  updatedAt: string;
 };

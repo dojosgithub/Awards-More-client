@@ -61,7 +61,7 @@ export default function ProductShopView() {
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { products, productsLoading, productsEmpty } = useGetProducts();
+  // const { products, productsLoading, productsEmpty } = useGetProducts();
 
   const { searchResults, searchLoading } = useSearchProducts(debouncedQuery);
 
@@ -72,15 +72,15 @@ export default function ProductShopView() {
     }));
   }, []);
 
-  const dataFiltered = applyFilter({
-    inputData: products,
-    filters,
-    sortBy,
-  });
+  // const dataFiltered = applyFilter({
+  //   inputData: products,
+  //   filters,
+  //   sortBy,
+  // });
 
   const canReset = !isEqual(defaultFilters, filters);
 
-  const notFound = !dataFiltered.length && canReset;
+  // const notFound = !dataFiltered.length && canReset;
 
   const handleSortBy = useCallback((newValue: string) => {
     setSortBy(newValue);
@@ -132,17 +132,17 @@ export default function ProductShopView() {
     </Stack>
   );
 
-  const renderResults = (
-    <ProductFiltersResult
-      filters={filters}
-      onFilters={handleFilters}
-      //
-      canReset={canReset}
-      onResetFilters={handleResetFilters}
-      //
-      results={dataFiltered.length}
-    />
-  );
+  // const renderResults = (
+  //   <ProductFiltersResult
+  //     filters={filters}
+  //     onFilters={handleFilters}
+  //     //
+  //     canReset={canReset}
+  //     onResetFilters={handleResetFilters}
+  //     //
+  //     results={dataFiltered.length}
+  //   />
+  // );
 
   const renderNotFound = <EmptyContent filled title="No Data" sx={{ py: 10 }} />;
   const [searchParams] = useSearchParams();
