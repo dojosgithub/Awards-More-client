@@ -63,6 +63,9 @@ export const endpoints = {
     latest: '/api/post/latest',
     search: '/api/post/search',
   },
+  customer: {
+    list: '/api/customer/customers',
+  },
   product: {
     list: '/api/admin/products',
     add: '/api/admin/add-category',

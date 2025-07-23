@@ -1,30 +1,20 @@
-import sumBy from 'lodash/sumBy';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
-import { useTheme, alpha } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
+import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
-import { Box, Modal } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fTimestamp } from 'src/utils/format-time';
 // _mock
-import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
+import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -47,6 +37,8 @@ import { ICategoryTableFilters, IInvoice, IInvoiceTableFilterValue } from 'src/t
 //
 import CustomButton from 'src/components/button/CustomButton';
 
+import { useGetCustomers } from 'src/api/customers';
+import { ICustomer, ICustomerTableFilters } from 'src/types/customers';
 import CustomerTableToolbar from '../customer-table-toolbar';
 import CustomerTableRow from '../customer-table-row';
 
@@ -60,9 +52,9 @@ const TABLE_HEAD = [
   { id: 'datecreated', label: 'Date Created' },
 ];
 
-const defaultFilters: ICategoryTableFilters = {
+const defaultFilters: ICustomerTableFilters = {
   name: '',
-  service: [],
+  service: '',
   status: 'all',
   startDate: null,
   endDate: null,
@@ -82,10 +74,23 @@ export default function CustomerListView() {
 
   const confirm = useBoolean();
 
-  const [tableData, setTableData] = useState(_invoices);
+  const [filters, setFilters] = useState<ICustomerTableFilters>({
+    ...defaultFilters,
+    page: 1,
+    limit: 10,
+  });
+  const [page, setPage] = useState(0); // MUI uses 0-based page index
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const { customers, mutateCustomers, totalDocs } = useGetCustomers(filters);
 
-  const [filters, setFilters] = useState(defaultFilters);
   const [open, setOpen] = useState(false);
+
+  const [tableData, setTableData] = useState<ICustomer[]>([]);
+  useEffect(() => {
+    if (customers.length) {
+      setTableData(customers);
+    }
+  }, [customers]);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const dateError =
@@ -93,12 +98,7 @@ export default function CustomerListView() {
       ? filters.startDate.getTime() > filters.endDate.getTime()
       : false;
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
+  const dataFiltered = tableData;
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -128,7 +128,7 @@ export default function CustomerListView() {
 
   const handleDeleteRow = useCallback(
     (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
+      const deleteRow = tableData.filter((row) => row._id !== id);
       setTableData(deleteRow);
 
       table.onUpdatePageDeleteRow(dataInPage.length);
@@ -137,7 +137,7 @@ export default function CustomerListView() {
   );
 
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row._id));
     setTableData(deleteRows);
 
     table.onUpdatePageDeleteRows({
@@ -153,7 +153,17 @@ export default function CustomerListView() {
     },
     [router]
   );
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+    setFilters((prev) => ({ ...prev, page: newPage + 1 })); // API expects 1-based page
+  };
 
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLimit = parseInt(event.target.value, 10);
+    setRowsPerPage(newLimit);
+    setPage(0);
+    setFilters((prev) => ({ ...prev, page: 1, limit: newLimit }));
+  };
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -196,7 +206,7 @@ export default function CustomerListView() {
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      tableData.map((row) => row._id)
                     )
                   }
                 />
@@ -209,10 +219,10 @@ export default function CustomerListView() {
                     )
                     .map((row) => (
                       <CustomerTableRow
-                        key={row.id}
+                        key={row._id}
                         row={row}
-                        selected={table.selected.includes(row.id)}
-                        onViewRow={() => handleCustomerDetail(row.id)}
+                        selected={table.selected.includes(row._id)}
+                        onViewRow={() => handleCustomerDetail(row._id)}
                       />
                     ))}
 
@@ -276,7 +286,7 @@ function applyFilter({
 }: {
   inputData: IInvoice[];
   comparator: (a: any, b: any) => number;
-  filters: ICategoryTableFilters;
+  filters: ICustomerTableFilters;
   dateError: boolean;
 }) {
   const { name, status, service, startDate, endDate } = filters;
