@@ -17,26 +17,25 @@ import { useBoolean } from 'src/hooks/use-boolean';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 // types
-import { IInvoice } from 'src/types/category';
+import { ICategory, IInvoice } from 'src/types/category';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { IProduct } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IProduct;
+  row: ICategory;
   selected: boolean;
   onSelectRow: VoidFunction;
+  onViewRow: VoidFunction;
   onEditRow: VoidFunction;
   onDeleteRow: VoidFunction;
-  onViewRow: VoidFunction;
 };
 
-export default function ProductTableRow({
+export default function PromoCodeTableRow({
   row,
   selected,
   onSelectRow,
@@ -44,8 +43,7 @@ export default function ProductTableRow({
   onEditRow,
   onDeleteRow,
 }: Props) {
-  const { _id, imageUrl, title, category, sku, price, minimumOrderQuantity } = row;
-  console.log(imageUrl);
+  const { _id, title, description, imageUrl, status, createdAt, updatedAt } = row;
 
   const confirm = useBoolean();
 
@@ -55,20 +53,31 @@ export default function ProductTableRow({
     <>
       <TableRow hover selected={selected}>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar sx={{ mr: 2 }}>{imageUrl}</Avatar>
+          <Avatar
+            // alt={invoiceTo.name}
+            sx={{ mr: 2 }}
+          >
+            {imageUrl}
+          </Avatar>
         </TableCell>
 
         <TableCell>{title}</TableCell>
 
-        <TableCell>{category?.title}</TableCell>
+        <TableCell>{description}</TableCell>
 
-        <TableCell>{sku}</TableCell>
-        <TableCell>{price}</TableCell>
-        <TableCell>{minimumOrderQuantity}</TableCell>
+        <TableCell>
+          <Label variant="soft">{status}</Label>
+        </TableCell>
 
         <TableCell sx={{ px: 1 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+            <IconButton
+              color={popover.open ? 'inherit' : 'default'}
+              onClick={() => {
+                confirm.onTrue();
+                popover.onClose();
+              }}
+            >
               <Iconify icon="weui:delete-outlined" />
             </IconButton>
             <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
@@ -124,7 +133,14 @@ export default function ProductTableRow({
         title="Delete"
         content="Are you sure want to delete?"
         action={
-          <Button variant="contained" color="error" onClick={onDeleteRow}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              onDeleteRow();
+              confirm.onFalse();
+            }}
+          >
             Delete
           </Button>
         }
