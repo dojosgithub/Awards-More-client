@@ -97,6 +97,25 @@ export type IProduct = {
   imageUrl: string;
   title: string;
   category: IProductCategory;
+
+  sku: string;
+  price: string;
+  minimumOrderQuantity: number;
+  description: string;
+  quickbooksItemId: string;
+  qtyOnHand: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type IProductFormItems = {
+  _id: string;
+  files: any;
+  imageUrl?: string;
+
+  title: string;
+  category: string;
+
   sku: string;
   price: string;
   minimumOrderQuantity: number;

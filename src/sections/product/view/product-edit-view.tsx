@@ -31,7 +31,7 @@ export default function ProductEditView({ id }: Props) {
             name: 'Product',
             href: paths.dashboard.product.root,
           },
-          { name: currentProduct?.name },
+          { name: currentProduct?.title },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },

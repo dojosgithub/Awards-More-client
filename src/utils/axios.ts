@@ -69,11 +69,11 @@ export const endpoints = {
   },
   product: {
     list: '/api/admin/products',
-    add: '/api/admin/add-category',
-    update: '/api/admin/category/:id',
-    delete: '/api/admin/category/:id',
-
-    details: '/api/admin/category/:id',
+    add: '/api/admin/add-product',
+    update: '/api/admin/product/:id',
+    delete: '/api/admin/product/:id',
+    productCategories: '/api/admin/product-category',
+    details: '/api/admin/product/:id',
 
     latest: '/api/post/latest',
     search: '/api/post/search',

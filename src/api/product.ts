@@ -1,9 +1,15 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 // utils
-import { fetcher, endpoints } from 'src/utils/axios';
+import axios, { fetcher, endpoints } from 'src/utils/axios';
 // types
-import { IProduct, IProductFilters, IProductItem, IProductTableFilters } from 'src/types/product';
+import {
+  IProduct,
+  IProductFilters,
+  IProductFormItems,
+  IProductItem,
+  IProductTableFilters,
+} from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
@@ -41,42 +47,63 @@ export function useGetProducts(filters: IProductTableFilters) {
 }
 // ----------------------------------------------------------------------
 
-export function useGetProduct(productId: string) {
-  const URL = productId ? [endpoints.product.details, { params: { productId } }] : null;
+export function useGetProduct(id: string) {
+  const URL = id ? endpoints.product.details.replace(':id', id) : null;
 
   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
 
   const memoizedValue = useMemo(
     () => ({
-      product: data?.product as IProductItem,
+      product: data?.data as IProductFormItems,
       productLoading: isLoading,
       productError: error,
       productValidating: isValidating,
     }),
-    [data?.product, error, isLoading, isValidating]
+    [data?.data, error, isLoading, isValidating]
   );
 
   return memoizedValue;
 }
 
-// ----------------------------------------------------------------------
-
-export function useSearchProducts(query: string) {
-  const URL = query ? [endpoints.product.search, { params: { query } }] : null;
-
-  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, {
-    keepPreviousData: true,
+// add Product
+export async function createProduct(formData: FormData) {
+  console.log('apidata', formData);
+  const url = endpoints.product.add;
+  const response = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
+
+  return response.data;
+}
+// update Product
+export async function updateProduct(formData: FormData, categoryId: string) {
+  console.log('apidata', formData);
+
+  const url = endpoints.product.update.replace(':id', categoryId);
+
+  const response = await axios.put(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+}
+
+export function useGetProductCategories() {
+  const URL = endpoints.product.productCategories;
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
 
   const memoizedValue = useMemo(
     () => ({
-      searchResults: (data?.results as IProductItem[]) || [],
-      searchLoading: isLoading,
-      searchError: error,
-      searchValidating: isValidating,
-      searchEmpty: !isLoading && !data?.results.length,
+      productCategories: data,
+      productLoading: isLoading,
+      productError: error,
+      productValidating: isValidating,
     }),
-    [data?.results, error, isLoading, isValidating]
+    [data, error, isLoading, isValidating]
   );
 
   return memoizedValue;

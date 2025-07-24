@@ -16,9 +16,10 @@ import { UploadProps } from './types';
 // ----------------------------------------------------------------------
 
 export default function MultiFilePreview({ thumbnail, files, onRemove, sx }: UploadProps) {
+  const fileArray = Array.isArray(files) ? files : [];
   return (
     <AnimatePresence initial={false}>
-      {files?.map((file) => {
+      {fileArray?.map((file) => {
         const { key, name = '', size = 0 } = fileData(file);
 
         const isNotFormatFile = typeof file === 'string';

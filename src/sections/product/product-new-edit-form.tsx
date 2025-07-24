@@ -4,50 +4,46 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
+
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
-import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // routes
 import { paths } from 'src/routes/paths';
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
 // _mock
-import {
-  _tags,
-  PRODUCT_SIZE_OPTIONS,
-  PRODUCT_GENDER_OPTIONS,
-  PRODUCT_COLOR_NAME_OPTIONS,
-  PRODUCT_CATEGORY_GROUP_OPTIONS,
-  _roles,
-} from 'src/_mock';
+import { _roles } from 'src/_mock';
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import { useRouter } from 'src/routes/hooks';
 import FormProvider, {
-  RHFSelect,
   RHFEditor,
   RHFUpload,
-  RHFSwitch,
   RHFTextField,
-  RHFMultiSelect,
   RHFAutocomplete,
-  RHFMultiCheckbox,
 } from 'src/components/hook-form';
 // types
-import { IProductItem } from 'src/types/product';
+import { IProduct, IProductFormItems } from 'src/types/product';
+import { createProduct, updateProduct, useGetProductCategories } from 'src/api/product';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  currentProduct?: IProductItem;
+  currentProduct?: IProductFormItems;
+};
+type ProductFormValues = {
+  title: string;
+  description: string;
+  sku: string;
+  price: string;
+  minimumOrderQuantity: number;
+  files: (string | File)[];
+  category: string;
+};
+type CustomFile = File & {
+  preview?: string;
 };
 
 export default function ProductNewEditForm({ currentProduct }: Props) {
@@ -56,53 +52,42 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
   const mdUp = useResponsive('up', 'md');
 
   const { enqueueSnackbar } = useSnackbar();
-
-  const [includeTaxes, setIncludeTaxes] = useState(false);
+  const { productCategories } = useGetProductCategories();
+  // console.log('productCategories', productCategories);
 
   const NewProductSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    images: Yup.array().min(1, 'Images is required'),
-    tags: Yup.array().min(2, 'Must have at least 2 tags'),
-    category: Yup.string().required('Category is required'),
-    price: Yup.number().moreThan(0, 'Price should not be $0.00'),
+    title: Yup.string().required('Title is required'),
     description: Yup.string().required('Description is required'),
-    // not required
-    taxes: Yup.number(),
-    newLabel: Yup.object().shape({
-      enabled: Yup.boolean(),
-      content: Yup.string(),
-    }),
-    saleLabel: Yup.object().shape({
-      enabled: Yup.boolean(),
-      content: Yup.string(),
-    }),
+    sku: Yup.string().required('SKU is required'),
+    price: Yup.string()
+      .required('Price is required')
+      .test('is-positive', 'Price must be greater than 0', (value) => Number(value) > 0),
+
+    minimumOrderQuantity: Yup.number().required('Minimum Order Quantity is required').min(1),
+    files: Yup.array()
+      .of(Yup.mixed<string | File>().required()) // <--- Enforce non-undefined items
+      .required('At least one image is required')
+      .min(1, 'At least one image is required'),
+
+    category: Yup.string().required('Category is required'),
   });
+  console.log('currentProduct?.files', currentProduct?.imageUrl);
 
   const defaultValues = useMemo(
     () => ({
-      name: currentProduct?.name || '',
+      title: currentProduct?.title || '',
       description: currentProduct?.description || '',
-      subDescription: currentProduct?.subDescription || '',
-      images: currentProduct?.images || [],
-      //
-      code: currentProduct?.code || '',
       sku: currentProduct?.sku || '',
-      price: currentProduct?.price || 0,
-      quantity: currentProduct?.quantity || 0,
-      priceSale: currentProduct?.priceSale || 0,
-      tags: currentProduct?.tags || [],
-      taxes: currentProduct?.taxes || 0,
-      gender: currentProduct?.gender || '',
+      price: currentProduct?.price || '',
+      minimumOrderQuantity: currentProduct?.minimumOrderQuantity || 1,
+      files: currentProduct?.imageUrl ? [currentProduct.imageUrl] : [],
+
       category: currentProduct?.category || '',
-      colors: currentProduct?.colors || [],
-      sizes: currentProduct?.sizes || [],
-      newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
-      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' },
     }),
     [currentProduct]
   );
 
-  const methods = useForm({
+  const methods = useForm<ProductFormValues>({
     resolver: yupResolver(NewProductSchema),
     defaultValues,
   });
@@ -123,96 +108,111 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
     }
   }, [currentProduct, defaultValues, reset]);
 
-  useEffect(() => {
-    if (includeTaxes) {
-      setValue('taxes', 0);
-    } else {
-      setValue('taxes', currentProduct?.taxes || 0);
-    }
-  }, [currentProduct?.taxes, includeTaxes, setValue]);
-
   const onSubmit = handleSubmit(async (data) => {
+    const formData = new FormData();
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      enqueueSnackbar(currentProduct ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.product.root);
-      console.info('DATA', data);
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('sku', data.sku);
+      formData.append('price', Number(data.price).toString());
+
+      formData.append('minimumOrderQuantity', data.minimumOrderQuantity.toString());
+      formData.append('category', data.category);
+
+      // Append images
+      (data.files || []).forEach((file: File | string) => {
+        if (typeof file === 'object') {
+          formData.append('files', file as File);
+        }
+      });
+
+      if (currentProduct) {
+        await updateProduct(formData, currentProduct._id);
+        enqueueSnackbar('Product updated successfully!');
+      } else {
+        await createProduct(formData);
+        enqueueSnackbar('Product created successfully!');
+      }
+
+      router.push(paths.dashboard.category.root);
     } catch (error) {
-      console.error(error);
+      enqueueSnackbar('Error saving product. Please try again.', { variant: 'error' });
+      console.error('Submission error:', error);
     }
   });
 
   const handleDrop = useCallback(
     (acceptedFiles: File[]) => {
-      const files = values.images || [];
+      const files = values.files || [];
 
-      const newFiles = acceptedFiles.map((file) =>
+      const newFiles: CustomFile[] = acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
         })
       );
 
-      setValue('images', [...files, ...newFiles], { shouldValidate: true });
+      setValue('files', [...files, ...newFiles], { shouldValidate: true });
     },
-    [setValue, values.images]
+    [setValue, values.files]
   );
 
   const handleRemoveFile = useCallback(
     (inputFile: File | string) => {
-      const filtered = values.images && values.images?.filter((file) => file !== inputFile);
-      setValue('images', filtered);
+      const filtered = values.files?.filter((file) => file !== inputFile);
+      setValue('files', filtered);
     },
-    [setValue, values.images]
+    [setValue, values.files]
   );
 
   const handleRemoveAllFiles = useCallback(() => {
-    setValue('images', []);
+    setValue('files', []);
   }, [setValue]);
-
-  const handleChangeIncludeTaxes = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setIncludeTaxes(event.target.checked);
-  }, []);
 
   const renderDetails = (
     <Grid xs={12} md={8}>
       <Card>
         <Stack spacing={3} sx={{ p: 3 }}>
-          <RHFTextField name="name" label="Title" />
-          <Stack spacing={1.5}>
-            <Typography variant="subtitle2">Category Management</Typography>
-            <RHFAutocomplete
-              name="role"
-              autoHighlight
-              options={_roles.map((option) => option)}
-              getOptionLabel={(option) => option}
-              renderOption={(props, option) => (
-                <li {...props} key={option}>
-                  {option}
-                </li>
-              )}
-            />
-          </Stack>
-          <RHFTextField name="name" label="SKU" />
+          <RHFTextField name="title" label="Title" />
+          <RHFTextField name="sku" label="SKU" />
+          <RHFTextField name="price" label="Price" type="number" />
+          <RHFTextField name="minimumOrderQuantity" label="Minimum Order Quantity" type="number" />
+          <RHFAutocomplete
+            name="category"
+            options={productCategories}
+            getOptionLabel={(option) =>
+              typeof option === 'string'
+                ? productCategories.find((cat: { _id: string }) => cat._id === option)?.title || ''
+                : option.title
+            }
+            renderOption={(props, option) => (
+              <li {...props} key={option._id}>
+                {option.title}
+              </li>
+            )}
+            isOptionEqualToValue={(option, value) =>
+              typeof value === 'string' ? option._id === value : option._id === value._id
+            }
+            onChange={(_, newValue) => {
+              setValue('category', newValue?._id || '', { shouldValidate: true });
+            }}
+            value={
+              productCategories.find((cat: { _id: string }) => cat._id === watch('category')) ||
+              null
+            }
+          />
 
-          <RHFTextField name="name" label="Price" />
-          <RHFTextField name="name" label="Minimum" />
-
-          <Stack spacing={1.5}>
-            <RHFEditor simple name="description" />
-          </Stack>
+          <RHFEditor simple name="description" />
 
           <Stack spacing={1.5}>
             <Typography variant="subtitle2">Upload Pictures</Typography>
             <RHFUpload
               multiple
               thumbnail
-              name="images"
+              name="files"
               maxSize={3145728}
               onDrop={handleDrop}
               onRemove={handleRemoveFile}
               onRemoveAll={handleRemoveAllFiles}
-              onUpload={() => console.info('ON UPLOAD')}
             />
           </Stack>
         </Stack>

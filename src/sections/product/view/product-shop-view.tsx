@@ -20,7 +20,7 @@ import {
   PRODUCT_CATEGORY_OPTIONS,
 } from 'src/_mock';
 // api
-import { useGetProducts, useSearchProducts } from 'src/api/product';
+// import { useGetProducts, useSearchProducts } from 'src/api/product';
 // components
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
@@ -63,7 +63,7 @@ export default function ProductShopView() {
 
   // const { products, productsLoading, productsEmpty } = useGetProducts();
 
-  const { searchResults, searchLoading } = useSearchProducts(debouncedQuery);
+  // const { searchResults, searchLoading } = useSearchProducts(debouncedQuery);
 
   const handleFilters = useCallback((name: string, value: IProductFilterValue) => {
     setFilters((prevState) => ({
@@ -101,13 +101,13 @@ export default function ProductShopView() {
       alignItems={{ xs: 'flex-end', sm: 'center' }}
       direction={{ xs: 'column', sm: 'row' }}
     >
-      <ProductSearch
+      {/* <ProductSearch
         query={debouncedQuery}
         results={searchResults}
         onSearch={handleSearch}
         loading={searchLoading}
         hrefItem={(id: string) => paths.product.details(id)}
-      />
+      /> */}
 
       <Stack direction="row" spacing={1} flexShrink={0}>
         <ProductFilters

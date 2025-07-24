@@ -63,11 +63,11 @@ export default function ProductDetailsView({ id }: Props) {
 
   const [publish, setPublish] = useState('');
 
-  useEffect(() => {
-    if (product) {
-      setPublish(product?.publish);
-    }
-  }, [product]);
+  // useEffect(() => {
+  //   if (product) {
+  //     setPublish(product?.publish);
+  //   }
+  // }, [product]);
 
   const handleChangePublish = useCallback((newValue: string) => {
     setPublish(newValue);
@@ -99,16 +99,16 @@ export default function ProductDetailsView({ id }: Props) {
 
   const renderProduct = product && (
     <>
-      <ProductDetailsToolbar
+      {/* <ProductDetailsToolbar
         backLink={paths.dashboard.product.root}
         editLink={paths.dashboard.product.edit(`${product?.id}`)}
         liveLink={paths.product.details(`${product?.id}`)}
         publish={publish || ''}
         onChangePublish={handleChangePublish}
         publishOptions={PRODUCT_PUBLISH_OPTIONS}
-      />
+      /> */}
 
-      <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
+      {/* <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
         <Grid xs={12} md={6} lg={7}>
           <ProductDetailsCarousel product={product} />
         </Grid>
@@ -116,7 +116,7 @@ export default function ProductDetailsView({ id }: Props) {
         <Grid xs={12} md={6} lg={5}>
           <ProductDetailsSummary disabledActions product={product} />
         </Grid>
-      </Grid>
+      </Grid> */}
 
       <Box
         gap={5}
@@ -156,10 +156,10 @@ export default function ProductDetailsView({ id }: Props) {
               value: 'description',
               label: 'Description',
             },
-            {
-              value: 'reviews',
-              label: `Reviews (${product.reviews.length})`,
-            },
+            // {
+            //   value: 'reviews',
+            //   label: `Reviews (${product.reviews.length})`,
+            // },
           ].map((tab) => (
             <Tab key={tab.value} value={tab.value} label={tab.label} />
           ))}
@@ -169,14 +169,14 @@ export default function ProductDetailsView({ id }: Props) {
           <ProductDetailsDescription description={product?.description} />
         )}
 
-        {currentTab === 'reviews' && (
+        {/* {currentTab === 'reviews' && (
           <ProductDetailsReview
             ratings={product.ratings}
             reviews={product.reviews}
             totalRatings={product.totalRatings}
             totalReviews={product.totalReviews}
           />
-        )}
+        )} */}
       </Card>
     </>
   );
