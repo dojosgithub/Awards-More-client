@@ -71,7 +71,7 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
 
     category: Yup.string().required('Category is required'),
   });
-  console.log('currentProduct?.files', currentProduct?.imageUrl);
+  // console.log('currentProduct?.files', currentProduct?.imageUrls);
 
   const defaultValues = useMemo(
     () => ({
@@ -80,7 +80,7 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
       sku: currentProduct?.sku || '',
       price: currentProduct?.price || '',
       minimumOrderQuantity: currentProduct?.minimumOrderQuantity || 1,
-      files: currentProduct?.imageUrl ? [currentProduct.imageUrl] : [],
+      files: currentProduct?.imageUrls || [],
 
       category: currentProduct?.category || '',
     }),
@@ -134,7 +134,7 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
         enqueueSnackbar('Product created successfully!');
       }
 
-      router.push(paths.dashboard.category.root);
+      router.push(paths.dashboard.product.root);
     } catch (error) {
       enqueueSnackbar('Error saving product. Please try again.', { variant: 'error' });
       console.error('Submission error:', error);
@@ -178,6 +178,7 @@ export default function ProductNewEditForm({ currentProduct }: Props) {
           <RHFTextField name="minimumOrderQuantity" label="Minimum Order Quantity" type="number" />
           <RHFAutocomplete
             name="category"
+            label="Category"
             options={productCategories}
             getOptionLabel={(option) =>
               typeof option === 'string'

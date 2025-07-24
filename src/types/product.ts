@@ -111,7 +111,7 @@ export type IProduct = {
 export type IProductFormItems = {
   _id: string;
   files: any;
-  imageUrl?: string;
+  imageUrls?: any;
 
   title: string;
   category: string;
