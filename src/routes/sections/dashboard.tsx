@@ -24,11 +24,15 @@ const ProductEditPage = lazy(() => import('src/pages/dashboard/product/edit'));
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
-// INVOICE
+// Category
 const CategoryListPage = lazy(() => import('src/pages/dashboard/category/list'));
 const CategoryDetailsPage = lazy(() => import('src/pages/dashboard/category/details'));
 const CategoryCreatePage = lazy(() => import('src/pages/dashboard/category/new'));
 const CategoryEditPage = lazy(() => import('src/pages/dashboard/category/edit'));
+// PromoCode
+const PromoCodeListPage = lazy(() => import('src/pages/dashboard/promo-code/list'));
+const PromoCodeCreatePage = lazy(() => import('src/pages/dashboard/promo-code/new'));
+const PromoCodeEditPage = lazy(() => import('src/pages/dashboard/promo-code/edit'));
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
 const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
@@ -122,6 +126,15 @@ export const dashboardRoutes = [
           { path: ':id', element: <CategoryDetailsPage /> },
           { path: ':id/edit', element: <CategoryEditPage /> },
           { path: 'new', element: <CategoryCreatePage /> },
+        ],
+      },
+      {
+        path: 'promo-code',
+        children: [
+          { element: <PromoCodeListPage />, index: true },
+          { path: 'list', element: <PromoCodeListPage /> },
+          { path: ':id/edit', element: <PromoCodeEditPage /> },
+          { path: 'new', element: <PromoCodeCreatePage /> },
         ],
       },
       {

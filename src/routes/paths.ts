@@ -146,6 +146,11 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/category/${MOCK_ID}/edit`,
       },
     },
+    promocode: {
+      root: `${ROOTS.DASHBOARD}/promo-code`,
+      new: `${ROOTS.DASHBOARD}/promo-code/new`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/promo-code/${id}/edit`,
+    },
     post: {
       root: `${ROOTS.DASHBOARD}/post`,
       new: `${ROOTS.DASHBOARD}/post/new`,
