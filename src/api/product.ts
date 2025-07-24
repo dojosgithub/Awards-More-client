@@ -108,3 +108,12 @@ export function useGetProductCategories() {
 
   return memoizedValue;
 }
+
+// delete Product
+export async function deleteProduct(productId: string) {
+  const url = endpoints.product.delete.replace(':id', productId);
+
+  const response = await axios.delete(url);
+
+  return response.data;
+}

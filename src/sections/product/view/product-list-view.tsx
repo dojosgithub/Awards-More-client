@@ -33,7 +33,7 @@ import {
 // types
 import CustomButton from 'src/components/button/CustomButton';
 import { IProduct, IProductTableFilters, IProductTableFilterValue } from 'src/types/product';
-import { useGetProduct, useGetProducts } from 'src/api/product';
+import { deleteProduct, useGetProduct, useGetProducts } from 'src/api/product';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableRow from '../product-table-row';
 import NewProductExcelUploadForm from './product-new-csv-form';
@@ -113,7 +113,7 @@ export default function ProductListView() {
       : false;
 
   const dataFiltered = tableData;
-  console.log('dataFiltered', dataFiltered);
+  // console.log('dataFiltered', dataFiltered);
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -144,7 +144,7 @@ export default function ProductListView() {
   const handleDeleteRow = useCallback(
     async (id: string) => {
       try {
-        // await deleteCategory(id);
+        await deleteProduct(id);
         enqueueSnackbar('Product deleted successfully!');
         mutateProducts();
       } catch (error) {
@@ -154,17 +154,6 @@ export default function ProductListView() {
     },
     [mutateProducts]
   );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row._id));
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
   const handleEditRow = useCallback(
     (id: string) => {
