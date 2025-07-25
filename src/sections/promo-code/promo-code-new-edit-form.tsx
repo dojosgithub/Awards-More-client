@@ -1,65 +1,117 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as Yup from 'yup';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-
+import type { Resolver } from 'react-hook-form';
 import Stack from '@mui/material/Stack';
-import { Button, Typography } from '@mui/material';
-
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  Chip,
+  OutlinedInput,
+} from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { enqueueSnackbar } from 'notistack';
 import { useRouter } from 'src/routes/hooks';
-import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
-import { createCategory, updateCategory } from 'src/api/categories';
-import { ICategoryItem } from 'src/types/category';
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { paths } from 'src/routes/paths';
+import type { IPromoCodeItem } from 'src/types/promo-codes';
+import { createPromoCode } from 'src/api/promo-code';
 
 type Props = {
-  currentCategory?: ICategoryItem;
+  currentCategory?: IPromoCodeItem;
   handleClose?: () => void;
   mutateCategory?: () => void;
 };
-type FormValuesProps = {
-  title: string;
-  description: string;
 
-  file: any;
+type FormValuesProps = {
+  code: string;
+  createdFor: string;
+  type: 'percentage' | 'fixed amount';
+  discountAmount: number;
+  isNewUser: boolean;
+  isredemptionLimit: boolean;
+  isProductSpecific: boolean;
+  products: string[];
+  redeemptionLimit: number | null;
+  expiryDate: Date | null;
+  expiryTime: Date | null;
+  hasExpirationDate: boolean;
 };
 
-export default function PromoCodeNewEditForm({
-  currentCategory,
-  handleClose,
-  mutateCategory,
-}: Props) {
+// Mock products data - replace with your actual products
+const AVAILABLE_PRODUCTS = [
+  { id: '68809d2418a05906c04898f5', name: 'Product 1' },
+  { id: '68821648c25e750e6db101f2', name: 'Product 2' },
+  { id: '68809d2418a05906c04898f6', name: 'Product 3' },
+  { id: '68821648c25e750e6db101f3', name: 'Product 4' },
+];
+
+export default function PromoCodeNewEditForm({ handleClose, mutateCategory }: Props) {
   const router = useRouter();
 
-  const CategorySchema = Yup.object({
-    title: Yup.string().required('Title is required'),
-    description: Yup.string().required('Description is required'),
-    file: Yup.mixed<File>()
-      .required('File is required')
-      .test('fileType', 'Unsupported File Format', (value) => {
-        if (!value) return false;
-        return ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type);
-      })
-      .defined(),
-  });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const defaultValues = useMemo<FormValuesProps>(
-    () => ({
-      title: currentCategory?.title || '',
-      description: currentCategory?.description || '',
-      file: currentCategory?.imageUrl || null,
-    }),
-    [currentCategory]
-  );
+  const PromoCodeSchema = Yup.object({
+    code: Yup.string().required('Promo code is required'),
+    createdFor: Yup.string().required('Created for is required'),
+    type: Yup.string().oneOf(['percentage', 'fixed amount']).required('Type is required'),
+    discountAmount: Yup.number()
+      .positive('Discount amount must be positive')
+      .required('Discount amount is required'),
 
+    // Explicitly required booleans (since FormValuesProps expects them to be non-null)
+    isNewUser: Yup.boolean().required(),
+    isredemptionLimit: Yup.boolean().required(),
+    isProductSpecific: Yup.boolean().required(),
+    hasExpirationDate: Yup.boolean().required(),
+
+    products: Yup.array()
+      .of(Yup.string().required('Product ID is required')) // Ensure each item is a required string
+      .required('Products array is required'),
+
+    redeemptionLimit: Yup.number()
+      .nullable()
+      .when('isredemptionLimit', {
+        is: true,
+        then: (schema) =>
+          schema
+            .positive('Redemption limit must be positive')
+            .required('Redemption limit is required'),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+
+    expiryDate: Yup.date().nullable(),
+    expiryTime: Yup.date().nullable(),
+  });
+
+  const resolver = yupResolver(PromoCodeSchema) as Resolver<FormValuesProps>;
   const methods = useForm<FormValuesProps>({
-    resolver: yupResolver(CategorySchema),
-    defaultValues,
+    resolver,
+    defaultValues: {
+      code: '',
+      createdFor: '',
+      type: 'percentage',
+      discountAmount: 0,
+      isNewUser: false,
+      isredemptionLimit: false,
+      isProductSpecific: false,
+      products: [],
+      redeemptionLimit: null,
+      expiryDate: null,
+      expiryTime: null,
+      hasExpirationDate: false,
+    },
   });
 
   const {
+    control,
     watch,
     reset,
     setValue,
@@ -70,83 +122,207 @@ export default function PromoCodeNewEditForm({
   const values = watch();
   console.log(values);
 
-  useEffect(() => {
-    // Reset form when currentCategory or defaultValues change
-    reset(defaultValues);
-  }, [currentCategory, defaultValues, reset]);
-
-  const onSubmit = handleSubmit(async (data) => {
-    const formData = new FormData();
-
+  const onSubmit = async (data: FormValuesProps) => {
     try {
-      // Append string fields
-      formData.append('title', data.title);
-      formData.append('description', data.description);
+      // Format the data to match the expected API structure
+      const payload = {
+        code: data.code,
+        createdFor: data.createdFor,
+        type: data.type,
+        discountAmount: data.discountAmount,
+        isNewUser: data.isNewUser,
+        isredemptionLimit: data.isredemptionLimit,
+        isProductSpecific: data.isProductSpecific,
+        products: data.isProductSpecific ? data.products : [],
+        redeemptionLimit: data.isredemptionLimit ? data.redeemptionLimit : 0,
+        expiryDate:
+          data.hasExpirationDate && data.expiryDate
+            ? data.expiryDate.toISOString().split('T')[0]
+            : null,
+        expiryTime:
+          data.hasExpirationDate && data.expiryTime
+            ? data.expiryTime.toTimeString().split(' ')[0].substring(0, 5)
+            : null,
+      };
 
-      if (data.file && typeof data.file === 'object' && 'type' in data.file) {
-        formData.append('file', data.file as File);
-      } else {
-        formData.append('file', '');
-      }
+      // Remove null values if not needed
+      const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([_, value]) => value !== null && value !== undefined)
+      );
 
-      // Debug log
-      formData.forEach((value, key) => {
-        console.log(`${key}:`, value);
-      });
+      console.log('Sending payload:', cleanPayload);
 
-      if (currentCategory) {
-        await updateCategory(formData, currentCategory._id);
-        enqueueSnackbar('Category updated successfully!');
-      } else {
-        await createCategory(formData);
-        enqueueSnackbar('Category created successfully!');
-        if (mutateCategory) {
-          mutateCategory();
-        }
-        if (handleClose) {
-          handleClose();
-        }
-      }
-
-      // Redirect in both cases
+      await createPromoCode(cleanPayload);
+      enqueueSnackbar('Promo code created successfully!');
+      mutateCategory?.();
+      handleClose?.();
       router.push(paths.dashboard.category.root);
     } catch (error) {
-      enqueueSnackbar('Error saving employee. Please try again.', { variant: 'error' });
+      enqueueSnackbar('Error creating promo code. Please try again.', { variant: 'error' });
       console.error('Submission error:', error);
     }
-  });
-
-  const handleDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (!file) return;
-
-      const fileWithPreview = Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      });
-
-      setValue('file', fileWithPreview as unknown as File, { shouldValidate: true });
-    },
-    [setValue]
-  );
-
-  const handleRemoveFile = useCallback(() => setValue('file', null), [setValue]);
+  };
 
   return (
-    <FormProvider methods={methods} onSubmit={onSubmit}>
+    <FormProvider methods={methods} onSubmit={methods.handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        <RHFTextField name="title" label="Title" />
-        <RHFTextField name="description" label="Description" multiline rows={3} />
+        <Typography sx={{ fontSize: '22px', fontWeight: 600 }}>Add Promo Code</Typography>
 
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Upload Picture</Typography>
-          <RHFUpload
-            name="file"
-            maxSize={3145728}
-            onDrop={handleDrop}
-            onDelete={handleRemoveFile}
+        <RHFTextField name="code" label="Promo Code" placeholder="e.g., WELCOME30" />
+
+        <RHFTextField name="createdFor" label="Created For" placeholder="e.g., new users" />
+
+        <Controller
+          name="type"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <FormControl fullWidth error={!!error}>
+              <InputLabel>Discount Type</InputLabel>
+              <Select {...field} label="Discount Type">
+                <MenuItem value="percentage">Percentage</MenuItem>
+                <MenuItem value="fixed amount">Fixed Amount</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        />
+
+        <RHFTextField
+          name="discountAmount"
+          label="Discount Amount"
+          type="number"
+          placeholder={values.type === 'percentage' ? 'e.g., 30' : 'e.g., 100'}
+        />
+
+        <Typography sx={{ fontSize: '20px', fontWeight: 600 }}>Settings</Typography>
+
+        <Controller
+          name="isNewUser"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} checked={field.value} />}
+              label="Eligible for first-time order only"
+            />
+          )}
+        />
+
+        <Controller
+          name="isProductSpecific"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} checked={field.value} />}
+              label="Limit to specific Products"
+            />
+          )}
+        />
+
+        {values.isProductSpecific && (
+          <Controller
+            name="products"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth>
+                <InputLabel>Select Products</InputLabel>
+                <Select
+                  {...field}
+                  multiple
+                  input={<OutlinedInput label="Select Products" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {(selected as string[]).map((value) => {
+                        const product = AVAILABLE_PRODUCTS.find((p) => p.id === value);
+                        return <Chip key={value} label={product?.name || value} />;
+                      })}
+                    </Box>
+                  )}
+                >
+                  {AVAILABLE_PRODUCTS.map((product) => (
+                    <MenuItem key={product.id} value={product.id}>
+                      {product.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           />
-        </Stack>
+        )}
+
+        <Controller
+          name="isredemptionLimit"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} checked={field.value} />}
+              label="Limit the number of times this code can be redeemed"
+            />
+          )}
+        />
+
+        {values.isredemptionLimit && (
+          <>
+            <Typography sx={{ fontSize: '18px', fontWeight: 600 }}>Redemption Limit</Typography>
+            <RHFTextField
+              name="redeemptionLimit"
+              label="Maximum Redemptions"
+              type="number"
+              placeholder="e.g., 100"
+            />
+          </>
+        )}
+
+        <Controller
+          name="hasExpirationDate"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} checked={field.value} />}
+              label="Add an expiration date"
+            />
+          )}
+        />
+
+        {values.hasExpirationDate && (
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Controller
+              name="expiryDate"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <DatePicker
+                  label="Expiry Date"
+                  value={field.value}
+                  onChange={(newValue) => field.onChange(newValue)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!error,
+                      helperText: error?.message,
+                    },
+                  }}
+                />
+              )}
+            />
+
+            <Controller
+              name="expiryTime"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TimePicker
+                  label="Expiry Time"
+                  value={field.value}
+                  onChange={(newValue) => field.onChange(newValue)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!error,
+                      helperText: error?.message,
+                    },
+                  }}
+                />
+              )}
+            />
+          </Box>
+        )}
 
         <LoadingButton
           sx={{
@@ -161,7 +337,7 @@ export default function PromoCodeNewEditForm({
           size="large"
           loading={isSubmitting}
         >
-          Submit Now
+          Create Promo Code
         </LoadingButton>
       </Stack>
     </FormProvider>

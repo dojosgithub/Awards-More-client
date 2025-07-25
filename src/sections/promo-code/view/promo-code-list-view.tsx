@@ -165,7 +165,7 @@ export default function PromoCodeListView() {
 
   const handleEditRow = useCallback(
     (id: string) => {
-      router.push(paths.dashboard.category.edit(id));
+      router.push(paths.dashboard.promocode.edit(id));
     },
     [router]
   );
@@ -176,7 +176,9 @@ export default function PromoCodeListView() {
     },
     [router]
   );
-
+  const handleCreatePromoCodeView = useCallback(() => {
+    router.push(paths.dashboard.promocode.new);
+  }, [router]);
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
     setFilters((prev) => ({ ...prev, page: newPage + 1 }));
@@ -204,7 +206,7 @@ export default function PromoCodeListView() {
               href: paths.dashboard.category.root,
             },
           ]}
-          action={<CustomButton label="Add Category" onClick={handleOpen} />}
+          action={<CustomButton label="Add Promo Code" href={paths.dashboard.promocode.new} />}
           sx={{
             mb: { xs: 3, md: 5 },
           }}

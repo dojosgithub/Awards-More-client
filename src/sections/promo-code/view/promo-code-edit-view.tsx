@@ -44,7 +44,7 @@ export default function PromoCodeEditView({ id }: Props) {
         }}
       />
 
-      <PromoCodeNewEditForm currentCategory={currentCategory} />
+      <PromoCodeNewEditForm />
     </Container>
   );
 }
