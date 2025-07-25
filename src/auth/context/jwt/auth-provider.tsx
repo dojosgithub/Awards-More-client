@@ -2,6 +2,8 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 // utils
 import axios, { endpoints } from 'src/utils/axios';
 //
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 import { AuthContext } from './auth-context';
 import { isValidToken, setSession } from './utils';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
@@ -81,7 +83,7 @@ type Props = {
 
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  const router = useRouter();
   const initialize = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
@@ -190,7 +192,12 @@ export function AuthProvider({ children }: Props) {
   // ----------------------------------------------------------------------
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
-
+  console.log('checkAuthenticated', checkAuthenticated);
+  useEffect(() => {
+    if (checkAuthenticated === 'unauthenticated') {
+      router.push(paths.auth.jwt.login);
+    }
+  }, [checkAuthenticated, router]);
   const status = state.loading ? 'loading' : checkAuthenticated;
 
   const memoizedValue = useMemo(
