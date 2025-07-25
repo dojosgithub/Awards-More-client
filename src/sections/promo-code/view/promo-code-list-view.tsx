@@ -16,9 +16,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
-// utils
-// _mock
-import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
+
 // components
 
 import Scrollbar from 'src/components/scrollbar';
@@ -27,18 +25,18 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
   useTable,
-  getComparator,
   emptyRows,
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
-  TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { ICategory, ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { IInvoiceTableFilterValue } from 'src/types/category';
 //
 import CustomButton from 'src/components/button/CustomButton';
-import { deleteCategory, useGetCategories } from 'src/api/categories';
+import { deleteCategory } from 'src/api/categories';
+import { IPromoCode, IPromoCodeTableFilters } from 'src/types/promo-codes';
+import { useGetPromoCodes } from 'src/api/promo-code';
 import PromoCodeTableToolbar from '../promo-code-table-toolbar';
 import PromoCodeTableRow from '../promo-code-table-row';
 import PromoCodeNewEditForm from '../promo-code-new-edit-form';
@@ -46,11 +44,9 @@ import PromoCodeNewEditForm from '../promo-code-new-edit-form';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'invoiceNumber', label: 'Image' },
-  { id: 'createDate', label: 'Title' },
-  { id: 'dueDate', label: 'Description' },
-  { id: 'price', label: 'Status' },
-  { id: 'status', label: 'Action' },
+  { id: 'code', label: 'Code' },
+  { id: 'createdFor', label: 'Created For' },
+  { id: 'discountAmount', label: 'Discount Amount' },
 ];
 const style = {
   position: 'absolute',
@@ -63,13 +59,13 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-const defaultFilters: ICategoryTableFilters = {
-  name: '',
-  service: [],
-  status: 'all',
-  startDate: null,
-  endDate: null,
+const defaultFilters: IPromoCodeTableFilters = {
+  code: '',
+  type: '',
+  discountAmount: 0,
   role: '',
+  createdFor: '',
+  _id: '',
 };
 
 // ----------------------------------------------------------------------
@@ -82,17 +78,16 @@ export default function PromoCodeListView() {
   const router = useRouter();
 
   const table = useTable({ defaultOrderBy: '' });
-  const [filters, setFilters] = useState<ICategoryTableFilters>({
+  const [filters, setFilters] = useState<IPromoCodeTableFilters>({
     ...defaultFilters,
     page: 1,
     limit: 10,
   });
 
   const confirm = useBoolean();
-  const { category, categoryLoading, categoryError, mutateCategory, totalDocs } =
-    useGetCategories(filters);
+  const { promocodes, mutatePromocodes, totalDocs } = useGetPromoCodes(filters);
   // console.log('category', category);
-  const [tableData, setTableData] = useState<ICategory[]>([]);
+  const [tableData, setTableData] = useState<IPromoCode[]>([]);
 
   const [page, setPage] = useState(0); // MUI uses 0-based page index
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -101,15 +96,12 @@ export default function PromoCodeListView() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+
   useEffect(() => {
-    if (category.length) {
-      setTableData(category);
+    if (promocodes.length) {
+      setTableData(promocodes);
     }
-  }, [category]);
+  }, [promocodes]);
   const dataFiltered = tableData;
 
   const dataInPage = dataFiltered.slice(
@@ -119,11 +111,7 @@ export default function PromoCodeListView() {
 
   const denseHeight = table.dense ? 56 : 76;
 
-  const canReset =
-    !!filters.name ||
-    !!filters.service.length ||
-    filters.status !== 'all' ||
-    (!!filters.startDate && !!filters.endDate);
+  const canReset = !!filters.code;
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -143,13 +131,13 @@ export default function PromoCodeListView() {
       try {
         await deleteCategory(id);
         enqueueSnackbar('Category deleted successfully!');
-        mutateCategory();
+        mutatePromocodes();
       } catch (error) {
         console.error('Error deleting Category:', error);
         enqueueSnackbar('Failed to delete Category', { variant: 'error' });
       }
     },
-    [mutateCategory]
+    [mutatePromocodes]
   );
 
   const handleDeleteRows = useCallback(() => {
@@ -176,9 +164,7 @@ export default function PromoCodeListView() {
     },
     [router]
   );
-  const handleCreatePromoCodeView = useCallback(() => {
-    router.push(paths.dashboard.promocode.new);
-  }, [router]);
+
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
     setFilters((prev) => ({ ...prev, page: newPage + 1 }));
@@ -195,14 +181,14 @@ export default function PromoCodeListView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="Category Management"
+          heading="Promo Code Management"
           links={[
             {
               name: 'Dashboard',
               href: paths.dashboard.root,
             },
             {
-              name: 'Categories',
+              name: 'promo Codes',
               href: paths.dashboard.category.root,
             },
           ]}
@@ -217,8 +203,6 @@ export default function PromoCodeListView() {
             filters={filters}
             onFilters={handleFilters}
             //
-            dateError={dateError}
-            serviceOptions={INVOICE_SERVICE_OPTIONS.map((option) => option.name)}
           />
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
@@ -315,55 +299,9 @@ export default function PromoCodeListView() {
         >
           <h2 id="add-category-title">Add New Category</h2>
 
-          <PromoCodeNewEditForm handleClose={handleClose} mutateCategory={mutateCategory} />
+          <PromoCodeNewEditForm handleClose={handleClose} mutateCategory={mutatePromocodes} />
         </Box>
       </Modal>
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applyFilter({
-  inputData,
-  comparator,
-  filters,
-  dateError,
-}: {
-  inputData: ICategory[];
-  comparator: (a: any, b: any) => number;
-  filters: ICategoryTableFilters;
-  dateError: boolean;
-}) {
-  const { name, status, service, startDate, endDate } = filters;
-
-  const stabilizedThis = inputData.map((el, index) => [el, index] as const);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  inputData = stabilizedThis.map((el) => el[0]);
-
-  if (name) {
-    inputData = inputData.filter(
-      (category) =>
-        category.title.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        category.title.toLowerCase().indexOf(name.toLowerCase()) !== -1
-    );
-  }
-
-  if (status !== 'all') {
-    inputData = inputData.filter((category) => category.status === status);
-  }
-
-  // if (service.length) {
-  //   inputData = inputData.filter((category) =>
-  //     category.items.some((filterItem) => service.includes(filterItem.service))
-  //   );
-  // }
-
-  return inputData;
 }

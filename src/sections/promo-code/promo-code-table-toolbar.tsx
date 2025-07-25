@@ -1,70 +1,33 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 // @mui
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Stack from '@mui/material/Stack';
-import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
-import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 // types
-import { ICategoryTableFilters, IInvoiceTableFilterValue } from 'src/types/category';
+import { debounce } from 'lodash';
+import { IInvoiceTableFilterValue } from 'src/types/category';
 // components
 import Iconify from 'src/components/iconify';
-import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { IPromoCodeTableFilters } from 'src/types/promo-codes';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  filters: ICategoryTableFilters;
-  onFilters: (name: string, value: IInvoiceTableFilterValue) => void;
+  filters: IPromoCodeTableFilters;
+  onFilters: (code: string, value: IInvoiceTableFilterValue) => void;
   //
-  dateError: boolean;
-  serviceOptions: string[];
+  // dateError: boolean;
 };
 
-export default function PromoCodeTableToolbar({
-  filters,
-  onFilters,
-  //
-  dateError,
-  serviceOptions,
-}: Props) {
-  const popover = usePopover();
-
-  const handleFilterName = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onFilters('name', event.target.value);
-    },
+export default function PromoCodeTableToolbar({ filters, onFilters }: Props) {
+  const handleFilterName = useMemo(
+    () => debounce((value: string) => onFilters('code', value), 300),
     [onFilters]
   );
 
-  const handleFilterService = useCallback(
-    (event: SelectChangeEvent<string[]>) => {
-      onFilters(
-        'service',
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value
-      );
-    },
-    [onFilters]
-  );
-
-  const handleFilterStartDate = useCallback(
-    (newValue: Date | null) => {
-      onFilters('startDate', newValue);
-    },
-    [onFilters]
-  );
-
-  const handleFilterEndDate = useCallback(
-    (newValue: Date | null) => {
-      onFilters('endDate', newValue);
-    },
-    [onFilters]
+  useEffect(
+    () => () => handleFilterName.cancel(), // cleanup on unmount
+    [handleFilterName]
   );
 
   return (
@@ -83,8 +46,8 @@ export default function PromoCodeTableToolbar({
       <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
         <TextField
           fullWidth
-          value={filters.name}
-          onChange={handleFilterName}
+          value={filters.code}
+          onChange={(e) => handleFilterName(e.target.value)}
           placeholder="Search "
           InputProps={{
             startAdornment: (

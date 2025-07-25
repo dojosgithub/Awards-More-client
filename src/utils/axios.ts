@@ -42,7 +42,9 @@ export const endpoints = {
     labels: '/api/mail/labels',
   },
   promocode: {
-    add: '/api/admin/add-promo-code',
+    add: '/api/admin/add-promocode',
+    promocodeproduct: '/api/admin/promocode-products',
+    list: '/api/admin/promocodes',
   },
   category: {
     list: '/api/admin/categories',

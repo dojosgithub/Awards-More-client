@@ -2,14 +2,13 @@ import { IAddressItem } from './address';
 
 // ----------------------------------------------------------------------
 
-export type IInvoiceTableFilterValue = string | string[] | Date | null;
+export type IPromoCodeTableFilters = {
+  _id: string;
+  code: string;
+  type: string;
 
-export type ICategoryTableFilters = {
-  name: string;
-  service: string[];
-  status: string;
-  startDate: Date | null;
-  endDate: Date | null;
+  createdFor: string;
+  discountAmount: number;
   role: string;
   search?: string;
   page?: number;
@@ -18,41 +17,13 @@ export type ICategoryTableFilters = {
 
 // ----------------------------------------------------------------------
 
-export type IInvoiceItem = {
-  id: string;
-  title: string;
-  price: number;
-  total: number;
-  service: string;
-  quantity: number;
-  description: string;
-};
-
-export type IInvoice = {
-  id: string;
-  sent: number;
-  dueDate: Date;
-  taxes: number;
-  status: string;
-  subTotal: number;
-  createDate: Date;
-  discount: number;
-  shipping: number;
-  totalAmount: number;
-  invoiceNumber: string;
-  items: IInvoiceItem[];
-  invoiceTo: IAddressItem;
-  invoiceFrom: IAddressItem;
-};
-
-export type ICategory = {
+export type IPromoCode = {
   _id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  status: 'Active' | 'Inactive';
-  createdAt: string;
-  updatedAt: string;
+  code: string;
+  type: string;
+
+  createdFor: string;
+  discountAmount: number;
 };
 
 export type IPromoCodeItem = {

@@ -23,11 +23,12 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { IPromoCode } from 'src/types/promo-codes';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: ICategory;
+  row: IPromoCode;
   selected: boolean;
   onSelectRow: VoidFunction;
   onViewRow: VoidFunction;
@@ -43,7 +44,7 @@ export default function PromoCodeTableRow({
   onEditRow,
   onDeleteRow,
 }: Props) {
-  const { _id, title, description, imageUrl, status, createdAt, updatedAt } = row;
+  const { _id, code, createdFor, discountAmount } = row;
 
   const confirm = useBoolean();
 
@@ -52,39 +53,11 @@ export default function PromoCodeTableRow({
   return (
     <>
       <TableRow hover selected={selected}>
-        <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            // alt={invoiceTo.name}
-            sx={{ mr: 2 }}
-          >
-            {imageUrl}
-          </Avatar>
-        </TableCell>
+        <TableCell>{code}</TableCell>
 
-        <TableCell>{title}</TableCell>
+        <TableCell>{createdFor}</TableCell>
 
-        <TableCell>{description}</TableCell>
-
-        <TableCell>
-          <Label variant="soft">{status}</Label>
-        </TableCell>
-
-        <TableCell sx={{ px: 1 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton
-              color={popover.open ? 'inherit' : 'default'}
-              onClick={() => {
-                confirm.onTrue();
-                popover.onClose();
-              }}
-            >
-              <Iconify icon="weui:delete-outlined" />
-            </IconButton>
-            <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-              <Iconify icon="uil:edit" />
-            </IconButton>
-          </Box>
-        </TableCell>
+        <TableCell>{discountAmount}</TableCell>
       </TableRow>
 
       <CustomPopover

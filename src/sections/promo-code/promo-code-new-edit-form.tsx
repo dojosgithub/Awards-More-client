@@ -1,4 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useEffect,
+  useMemo,
+} from 'react';
 import * as Yup from 'yup';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -24,7 +32,7 @@ import { useRouter } from 'src/routes/hooks';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { paths } from 'src/routes/paths';
 import type { IPromoCodeItem } from 'src/types/promo-codes';
-import { createPromoCode } from 'src/api/promo-code';
+import { createPromoCode, useGetPromoCodeProducts } from 'src/api/promo-code';
 
 type Props = {
   currentCategory?: IPromoCodeItem;
@@ -47,17 +55,9 @@ type FormValuesProps = {
   hasExpirationDate: boolean;
 };
 
-// Mock products data - replace with your actual products
-const AVAILABLE_PRODUCTS = [
-  { id: '68809d2418a05906c04898f5', name: 'Product 1' },
-  { id: '68821648c25e750e6db101f2', name: 'Product 2' },
-  { id: '68809d2418a05906c04898f6', name: 'Product 3' },
-  { id: '68821648c25e750e6db101f3', name: 'Product 4' },
-];
-
 export default function PromoCodeNewEditForm({ handleClose, mutateCategory }: Props) {
   const router = useRouter();
-
+  const { promoCodeproducts } = useGetPromoCodeProducts();
   const PromoCodeSchema = Yup.object({
     code: Yup.string().required('Promo code is required'),
     createdFor: Yup.string().required('Created for is required'),
@@ -120,7 +120,7 @@ export default function PromoCodeNewEditForm({ handleClose, mutateCategory }: Pr
   } = methods;
 
   const values = watch();
-  console.log(values);
+  console.log('values', values);
 
   const onSubmit = async (data: FormValuesProps) => {
     try {
@@ -231,15 +231,17 @@ export default function PromoCodeNewEditForm({ handleClose, mutateCategory }: Pr
                   renderValue={(selected) => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                       {(selected as string[]).map((value) => {
-                        const product = AVAILABLE_PRODUCTS.find((p) => p.id === value);
-                        return <Chip key={value} label={product?.name || value} />;
+                        const product = promoCodeproducts.find(
+                          (p: { _id: string }) => p._id === value
+                        );
+                        return <Chip key={value} label={product?.title || value} />;
                       })}
                     </Box>
                   )}
                 >
-                  {AVAILABLE_PRODUCTS.map((product) => (
-                    <MenuItem key={product.id} value={product.id}>
-                      {product.name}
+                  {promoCodeproducts.map((product: { _id: string; title: string }) => (
+                    <MenuItem key={product._id} value={product._id}>
+                      {product.title}
                     </MenuItem>
                   ))}
                 </Select>
