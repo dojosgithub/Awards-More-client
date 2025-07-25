@@ -156,7 +156,7 @@ export default function PromoCodeNewEditForm({ handleClose, mutateCategory }: Pr
       enqueueSnackbar('Promo code created successfully!');
       mutateCategory?.();
       handleClose?.();
-      router.push(paths.dashboard.category.root);
+      router.push(paths.dashboard.promocode.root);
     } catch (error) {
       enqueueSnackbar('Error creating promo code. Please try again.', { variant: 'error' });
       console.error('Submission error:', error);
